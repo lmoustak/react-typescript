@@ -5,7 +5,7 @@ const Counter: React.FC = () => {
   const [step, setStep] = useState(1);
 
   const handleIncrementClick = () => setCounter(prevCounter => prevCounter + step);
-  const handleDecrementClick = () => setCounter(prevCounter => prevCounter + step);
+  const handleDecrementClick = () => setCounter(prevCounter => prevCounter - step);
   const handleResetClick = () => setCounter(0);
 
   const handleStepChange = (event: React.ChangeEvent<HTMLInputElement>) => setStep(event.target.valueAsNumber || 1);
