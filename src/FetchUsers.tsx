@@ -19,11 +19,9 @@ const FetchUsers: React.FC = () => {
   useEffect(() => {
     setLoading(true);
 
-    axios.get("https://jsonplaceholder.typicode.com/users")
-    .then(response => {
+    axios.get("https://jsonplaceholder.typicode.com/users").then(response => {
       setUsers(response.data);
-    })
-    .catch(error => {
+    }).catch(error => {
       if (error.response) {
         console.log("Data:", error.response.data);
         console.log("Status:", error.response.status);
@@ -36,6 +34,7 @@ const FetchUsers: React.FC = () => {
 
       console.log(error.config);
     }).finally(() => setLoading(false));
+    
   }, []);
 
   /**
