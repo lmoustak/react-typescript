@@ -13,6 +13,7 @@ import './App.css';
 import './styles.css'
 import Counter from './Counter';
 import FetchUsers from './FetchUsers';
+import Posts from './Posts';
 
 const App: React.FC = () => (
   <Router basename="/react-typescript">
@@ -27,8 +28,8 @@ const App: React.FC = () => (
 const AnimatedPages: React.FC = () => {
   const location = useLocation();
 
-  const markdown = 
-`# Welcome to the ReactJS playground
+  const markdown =
+    `# Welcome to the ReactJS playground
 ### Select one of the top links to begin`;
 
   const startScreen = (
@@ -53,6 +54,9 @@ const AnimatedPages: React.FC = () => {
           <li className="nav-item">
             <NavLink className="nav-link" to="/users">Users</NavLink>
           </li>
+          <li className="nav-item">
+            <NavLink className="nav-link" to="/posts">Posts</NavLink>
+          </li>
         </ul>
       </nav>
 
@@ -61,8 +65,8 @@ const AnimatedPages: React.FC = () => {
       <div className="container text-center">
         <TransitionGroup>
           <CSSTransition key={location.key}
-                         classNames="page"
-                         timeout={300}
+            classNames="page"
+            timeout={300}
           >
             <Switch location={location}>
               <Route exact path="/">
@@ -80,12 +84,17 @@ const AnimatedPages: React.FC = () => {
                   <FetchUsers />
                 </div>
               </Route>
+              <Route path="/posts">
+                <div className="page">
+                  <Posts />
+                </div>
+              </Route>
             </Switch>
 
           </CSSTransition>
         </TransitionGroup>
       </div>
-      
+
     </div>
   );
 
