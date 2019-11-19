@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { AgGridReact } from '@ag-grid-community/react';
-import { AllCommunityModules } from '@ag-grid-community/all-modules';
+import { AllCommunityModules, GridApi, GridReadyEvent } from '@ag-grid-community/all-modules';
 
 import '@ag-grid-community/all-modules/dist/styles/ag-grid.css';
 import '@ag-grid-community/all-modules/dist/styles/ag-theme-balham.css';
+
+import {useSearch, DataParams} from "./hooks/useSearch";
 
 
 const Posts: React.FC = () => {
@@ -18,8 +20,13 @@ const Posts: React.FC = () => {
 
   const [rowData, setRowData] = useState<Array<any>>([]);
   const [id, setId] = useState("");
+  const [query, setQuery] = useState<string | DataParams>("");
+
+  const [data, loading] = useSearch(query);
 
   const fetchRows = () => {
+    //setLoading(true);
+
     const url = "https://jsonplaceholder.typicode.com/posts" + (id ? `/${id}` : "");
     axios.get(url)
       .then(({ data: postData }) => {
@@ -38,6 +45,7 @@ const Posts: React.FC = () => {
         Promise.all(promises).then(() => {
           posts.forEach(post => post.username = users.find(user => user.id === post.userId).name);
           setRowData(posts);
+          //setLoading(false);
          });
 
       });
@@ -49,9 +57,25 @@ const Posts: React.FC = () => {
     setId(isNaN(parseInt(newValue)) ? "" : newValue);
   };
 
-  const handleSearchClick = () => fetchRows();
+  const handleSearchClick = () => setQuery({
+    queryUrl: "https://jsonplaceholder.typicode.com/posts",
+    transformations: {
+      transformationUrl: "https://jsonplaceholder.typicode.com/users",
+      fromField: "userId",
+      toField: "username",
+      queryResultField: "id"
+    }
+  });
 
-  useEffect(fetchRows, []);
+  //useEffect(fetchRows, []);
+
+  let gridApi: GridApi;
+  const onGridReady = (params: GridReadyEvent) => {
+    gridApi = params.api;
+    loading ? gridApi.showLoadingOverlay() : gridApi.hideOverlay();
+  }
+
+  const loadingTemplate = '<span class="ag-overlay-loading-center">Please wait while your rows are loading...</span>';
 
   return (
     <div
@@ -61,12 +85,14 @@ const Posts: React.FC = () => {
         width: '100%'
       }}
     >
-      <input type="text" value={id} onChange={handleIdChange} />
+      {/* <input type="text" value={id} onChange={handleIdChange} /> */}
       <button className="btn btn-primary" onClick={handleSearchClick}>Search</button>
       <AgGridReact
         columnDefs={columnDefs}
-        rowData={rowData}
+        rowData={data}
         modules={AllCommunityModules}
+        onGridReady={onGridReady}
+        overlayLoadingTemplate={loadingTemplate}
       >
       </AgGridReact>
     </div>

@@ -4,6 +4,7 @@ const Counter: React.FC = () => {
   const [counter, setCounter] = useState(0);
   const [step, setStep] = useState(1);
 
+
   const handleIncrementClick = () => setCounter(prevCounter => prevCounter + step);
   const handleDecrementClick = () => setCounter(prevCounter => prevCounter - step);
   const handleResetClick = () => setCounter(0);
