@@ -10,7 +10,15 @@ import '@ag-grid-community/all-modules/dist/styles/ag-theme-balham.css';
 const Posts: React.FC = () => {
   const columnDefs = [{
     headerName: "User", colId: "username", sortable: true, filter: true,
-    valueGetter: (params: any) => users.find(user => user.id === params.data.userId).name
+    valueGetter: (params: any) => {
+      let match = users.find(user => user.id === params.data.userId);
+
+      if (match != null) {
+        return match.name;
+      } else {
+        return params.data.userId;
+      }
+    }
   }, {
     headerName: "Title", field: "title", sortable: true, filter: true
   }, {
@@ -19,26 +27,34 @@ const Posts: React.FC = () => {
 
   const [rowData, setRowData] = useState<Array<any>>([]);
   const [users, setUsers] = useState<Array<any>>([]);
+  const [loading, setLoading] = useState(true);
 
   const frameworkComponents = {
     userRenderer: UserRenderer
   };
 
+  let gridApi: any;
+  const onGridReady = (params: any) => {
+    gridApi = params.api;
+  };
+
   useEffect(() => {
+    setLoading(true);
     axios.get("https://jsonplaceholder.typicode.com/posts")
-      .then(async ({ data: postData }) => {
-        setTimeout(() => {
+      .then(({ data: postData }) => {
+        setRowData(postData.slice(0, 10));
+        let userIds: Array<number> = postData.map((post: { userId: number }) => post.userId);
+        userIds = userIds.filter((userId, index, self) => self.indexOf(userId) === index);
+        let promises = [];
 
-          setRowData(postData);
-        }, 0);
-
-        for (let i = 0; i < postData.length; i++) {
-          let postUserId = postData[i].userId;
-          if (users.find(user => user.id === postUserId) == null) {
-            let { data } = await axios.get(`https://jsonplaceholder.typicode.com/users/${postUserId}`);
+        for (let i = 0; i < userIds.length; i++) {
+          promises.push(async () => {
+            let { data } = await axios.get(`https://jsonplaceholder.typicode.com/users/${userIds[i]}`);
             setUsers(prevUsers => [...prevUsers, data]);
-          }
+          });
         }
+
+        Promise.all(promises).then(() => { setLoading(false); gridApi.refreshCells(); });
 
       });
 
@@ -52,13 +68,16 @@ const Posts: React.FC = () => {
         width: '100%'
       }}
     >
-      <AgGridReact
-        columnDefs={columnDefs}
-        rowData={rowData}
-        modules={AllCommunityModules}
-        frameworkComponents={frameworkComponents}
-      >
-      </AgGridReact>
+      {!loading &&
+        <AgGridReact
+          columnDefs={columnDefs}
+          rowData={rowData}
+          modules={AllCommunityModules}
+          frameworkComponents={frameworkComponents}
+          onGridReady={onGridReady}
+        >
+        </AgGridReact>
+      }
     </div>
   );
 }
