@@ -17,11 +17,13 @@ const Posts: React.FC = () => {
   }];
 
   const [rowData, setRowData] = useState<Array<any>>([]);
+  const [id, setId] = useState("");
 
-  useEffect(() => {
-    axios.get("https://jsonplaceholder.typicode.com/posts")
+  const fetchRows = () => {
+    const url = "https://jsonplaceholder.typicode.com/posts" + (id ? `/${id}` : "");
+    axios.get(url)
       .then(({ data: postData }) => {
-        let posts: Array<any> = postData;
+        let posts: Array<any> = Array.isArray(postData) ? postData : [postData];
         let userIds: Array<number> = posts.map((post: { userId: number }) => post.userId);
         userIds = userIds.filter((userId, index, self) => self.indexOf(userId) === index);
         let users: Array<any> = [];
@@ -40,7 +42,16 @@ const Posts: React.FC = () => {
 
       });
 
-  }, []);
+  };
+
+  const handleIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let newValue = event.target.value;
+    setId(isNaN(parseInt(newValue)) ? "" : newValue);
+  };
+
+  const handleSearchClick = () => fetchRows();
+
+  useEffect(fetchRows, []);
 
   return (
     <div
@@ -50,6 +61,8 @@ const Posts: React.FC = () => {
         width: '100%'
       }}
     >
+      <input type="text" value={id} onChange={handleIdChange} />
+      <button className="btn btn-primary" onClick={handleSearchClick}>Search</button>
       <AgGridReact
         columnDefs={columnDefs}
         rowData={rowData}
