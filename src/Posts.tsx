@@ -9,16 +9,7 @@ import '@ag-grid-community/all-modules/dist/styles/ag-theme-balham.css';
 
 const Posts: React.FC = () => {
   const columnDefs = [{
-    headerName: "User", colId: "username", sortable: true, filter: true,
-    valueGetter: (params: any) => {
-      let match = users.find(user => user.id === params.data.userId);
-
-      if (match != null) {
-        return match.name;
-      } else {
-        return params.data.userId;
-      }
-    }
+    headerName: "User", field: "username", sortable: true, filter: true
   }, {
     headerName: "Title", field: "title", sortable: true, filter: true
   }, {
@@ -26,35 +17,26 @@ const Posts: React.FC = () => {
   }];
 
   const [rowData, setRowData] = useState<Array<any>>([]);
-  const [users, setUsers] = useState<Array<any>>([]);
-  const [loading, setLoading] = useState(true);
-
-  const frameworkComponents = {
-    userRenderer: UserRenderer
-  };
-
-  let gridApi: any;
-  const onGridReady = (params: any) => {
-    gridApi = params.api;
-  };
 
   useEffect(() => {
-    setLoading(true);
     axios.get("https://jsonplaceholder.typicode.com/posts")
       .then(({ data: postData }) => {
-        setRowData(postData.slice(0, 10));
-        let userIds: Array<number> = postData.map((post: { userId: number }) => post.userId);
+        let posts: Array<any> = postData;
+        let userIds: Array<number> = posts.map((post: { userId: number }) => post.userId);
         userIds = userIds.filter((userId, index, self) => self.indexOf(userId) === index);
-        let promises = [];
+        let users: Array<any> = [];
 
-        for (let i = 0; i < userIds.length; i++) {
-          promises.push(async () => {
-            let { data } = await axios.get(`https://jsonplaceholder.typicode.com/users/${userIds[i]}`);
-            setUsers(prevUsers => [...prevUsers, data]);
-          });
-        }
+        let fetchFunc = async (userId: number) => {
+          let { data } = await axios.get(`https://jsonplaceholder.typicode.com/users/${userId}`);
+          users.push(data);
+        };
 
-        Promise.all(promises).then(() => { setLoading(false); gridApi.refreshCells(); });
+        let promises = userIds.map(userId => fetchFunc(userId));
+        
+        Promise.all(promises).then(() => {
+          posts.forEach(post => post.username = users.find(user => user.id === post.userId).name);
+          setRowData(posts);
+         });
 
       });
 
@@ -68,29 +50,14 @@ const Posts: React.FC = () => {
         width: '100%'
       }}
     >
-      {!loading &&
-        <AgGridReact
-          columnDefs={columnDefs}
-          rowData={rowData}
-          modules={AllCommunityModules}
-          frameworkComponents={frameworkComponents}
-          onGridReady={onGridReady}
-        >
-        </AgGridReact>
-      }
+      <AgGridReact
+        columnDefs={columnDefs}
+        rowData={rowData}
+        modules={AllCommunityModules}
+      >
+      </AgGridReact>
     </div>
   );
-}
-
-const UserRenderer = (props: { value: string }) => {
-  const [username, setUsername] = useState("");
-
-  useEffect(() => {
-    axios.get(`https://jsonplaceholder.typicode.com/users/${props.value}`)
-      .then(({ data }: { data: { username: string } }) => setUsername(data.username));
-  });
-
-  return username;
 };
 
 export default Posts;
