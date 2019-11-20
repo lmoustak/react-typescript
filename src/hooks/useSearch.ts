@@ -39,26 +39,26 @@ export interface SearchParams {
 /**
  * A Hook designed to fetch data from a URL, and optionally transform it by joining it with other data queries.
  *
- * @param {(string|SearchParams)} props A string containing the query URL to fetch data from, or a SearchParams object
+ * @param {(string|SearchParams)} query A string containing the query URL to fetch data from, or a SearchParams object
  *
  * @retuns The [data, loading] tuple
  */
-const useSearch = (props: string | SearchParams = ""): [Array<{[key: string]: any}>, boolean] => {
-  const [data, setData] = useState<Array<{[key: string]: any}>>([]);
+const useSearch = (query: string | SearchParams = ""): [Array<{ [key: string]: any }>, boolean] => {
+  const [data, setData] = useState<Array<{ [key: string]: any }>>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    let url = typeof props === "string" ? props : props.url;
+    let url = typeof query === "string" ? query : query.url;
 
     const search = async () => {
       try {
         let { data: _searchData } = await axios.get(url);
         let searchData = Array.isArray(_searchData) ? _searchData : [_searchData];
 
-        if (typeof props !== "string" && props.joins != null) {
-          let joins = Array.isArray(props.joins)
-            ? props.joins
-            : [props.joins];
+        if (typeof query !== "string" && query.joins != null) {
+          let joins = Array.isArray(query.joins)
+            ? query.joins
+            : [query.joins];
 
           await Promise.all(joins.map(async joinClause => {
             let {
@@ -125,6 +125,8 @@ const useSearch = (props: string | SearchParams = ""): [Array<{[key: string]: an
         } else {
           console.error(err);
         }
+
+        setData([]);
       } finally {
         setLoading(false);
       }
@@ -136,7 +138,7 @@ const useSearch = (props: string | SearchParams = ""): [Array<{[key: string]: an
       search();
     }
 
-  }, [props]);
+  }, [query]);
 
   return [data, loading];
 };

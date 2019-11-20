@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AgGridReact } from '@ag-grid-community/react';
 import { AllCommunityModules, GridApi, GridReadyEvent } from '@ag-grid-community/all-modules';
 
@@ -32,18 +32,22 @@ const Posts: React.FC = () => {
   });
 
 
-  let gridApi: GridApi;
+  const gridApi = useRef<GridApi>();
   const onGridReady = (params: GridReadyEvent) => {
-    gridApi = params.api;
-    //console.log(loading);
-    /* if (loading) {
-      gridApi.showLoadingOverlay();
-    } */
-    //loading ? gridApi.showLoadingOverlay() : gridApi.hideOverlay();
+    gridApi.current = params.api;
   }
 
-  const loadingTemplate = '<span class="ag-overlay-loading-center">Please wait while your rows are loading...</span>';
-  const noDataTemplate = '<span class="ag-overlay-loading-center">No data available</span>';
+  useEffect(() => {
+    if (gridApi.current) {
+      if (loading) {
+        gridApi.current.showLoadingOverlay();
+      } else if (!data.length) {
+        gridApi.current.showNoRowsOverlay();
+      } else {
+        gridApi.current.hideOverlay();
+      }
+    }
+  });
 
   return (
     <div
@@ -59,8 +63,6 @@ const Posts: React.FC = () => {
         rowData={data}
         modules={AllCommunityModules}
         onGridReady={onGridReady}
-        overlayLoadingTemplate={loadingTemplate}
-        overlayNoRowsTemplate={noDataTemplate}
       >
       </AgGridReact>
     </div>
