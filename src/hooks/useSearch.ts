@@ -14,25 +14,26 @@ import axios from "axios";
  * @param {string} join The field of the result objects to test for equality...
  * @param {string} on with the field of the given data
  */
-export interface TransformationParams {
+export interface JoinParams {
   select: string,
   as: string,
   from: string,
   join: string,
   on: string,
-  params?: Array<string>  // TODO Implement at a later stage...
+  path?: string,
+  param?: string  // TODO Implement at a later stage...
 };
 
 /**
  * An interface containing parameters for fetching, and - optionally - transforming data
  *
- * @param {string} queryUrl The URL to fetch the data from
- * @param {TransformationParams} [transformations] Optional, may be a single object or an array of objects.
+ * @param {string} url The URL to fetch the data from
+ * @param {JoinParams} [joins] Optional, may be a single object or an array of objects.
  * Contains transformation parameters
  */
 export interface SearchParams {
-  queryUrl: string,
-  transformations?: TransformationParams | Array<TransformationParams>
+  url: string,
+  joins?: JoinParams | Array<JoinParams>
 };
 
 /**
@@ -47,29 +48,32 @@ const useSearch = (props: string | SearchParams = ""): [Array<any>, boolean] => 
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    let queryUrl = typeof props === "string" ? props : props.queryUrl;
+    let url = typeof props === "string" ? props : props.url;
 
     const search = async () => {
       try {
-        let { data: _searchData } = await axios.get(queryUrl);
+        let { data: _searchData } = await axios.get(url);
         let searchData = Array.isArray(_searchData) ? _searchData : [_searchData];
 
-        if (typeof props !== "string" && props.transformations != null) {
-          let transformations = Array.isArray(props.transformations)
-            ? props.transformations
-            : [props.transformations];
+        if (typeof props !== "string" && props.joins != null) {
+          let joins = Array.isArray(props.joins)
+            ? props.joins
+            : [props.joins];
 
-          await Promise.all(transformations.map(async transformation => {
+          await Promise.all(joins.map(async joinClause => {
             let {
               select: selectField,  // the result object's key to return
-              from: fromUrl,        // the URL to query for the JOIN
               as: newField,         // the new key to be added to the given data
+              from: fromUrl,        // the URL to query for the JOIN
               join: matchField,     // the result key whose value matches...
-              on: originalField     // the given key's value
-            } = transformation;
+              on: originalField,    // the given key's value
+              path,
+              param
+            } = joinClause;
 
-            if (fromUrl.lastIndexOf("/") !== fromUrl.length - 1) {
-              fromUrl += "/";
+
+            if (fromUrl.lastIndexOf("/") === fromUrl.length - 1) {
+              fromUrl = fromUrl.substring(0, fromUrl.length - 1);
             }
 
             let distinctValues = searchData
@@ -80,10 +84,26 @@ const useSearch = (props: string | SearchParams = ""): [Array<any>, boolean] => 
 
             await Promise.all(distinctValues.map(async value => {
               try {
-                let { data: result } = await axios.get(fromUrl + value)
+                let queryUrl: string;
+                if (path && fromUrl.includes(`:${path}`)) {
+                  queryUrl = fromUrl.replace(`:${path}`, value);
+                } else if (param) {
+                  queryUrl = `${fromUrl}?${param}=${value}`;
+                } else {
+                  queryUrl = `${fromUrl}/${value}`;
+                }
+
+                let { data: result } = await axios.get(queryUrl);
+                if (Array.isArray(result)) {
+                  [result] = result;
+                }
                 results.push(result);
               } catch (err) {
-                console.error(err.response.status);
+                if (err.response) {
+                  console.error(err.response.status);
+                } else {
+                  console.error(err);
+                }
               }
             }));
 
@@ -100,14 +120,18 @@ const useSearch = (props: string | SearchParams = ""): [Array<any>, boolean] => 
         setData(searchData);
 
       } catch (err) {
-        console.error(err.response.status);
+        if (err.response) {
+          console.error(err.response.status);
+        } else {
+          console.error(err);
+        }
       } finally {
         setLoading(false);
       }
 
     };
 
-    if (queryUrl) {
+    if (url) {
       setLoading(true);
       search();
     }

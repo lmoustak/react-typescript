@@ -21,8 +21,8 @@ const Posts: React.FC = () => {
   const [data, loading] = useSearch(query);
 
   const handleSearchClick = () => setQuery({
-    queryUrl: "https://jsonplaceholder.typicode.com/posts",
-    transformations: {
+    url: "https://jsonplaceholder.typicode.com/posts",
+    joins: {
       select: "name",
       as: "username",
       from: "https://jsonplaceholder.typicode.com/users",
