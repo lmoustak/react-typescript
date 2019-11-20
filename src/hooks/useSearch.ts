@@ -43,8 +43,8 @@ export interface SearchParams {
  *
  * @retuns The [data, loading] tuple
  */
-const useSearch = (props: string | SearchParams = ""): [Array<any>, boolean] => {
-  const [data, setData] = useState<Array<any>>([]);
+const useSearch = (props: string | SearchParams = ""): [Array<{[key: string]: any}>, boolean] => {
+  const [data, setData] = useState<Array<{[key: string]: any}>>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
