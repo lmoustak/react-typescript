@@ -44,10 +44,11 @@ export interface SearchParams {
  * @retuns The [data, loading] tuple
  */
 const useSearch = (query: string | SearchParams = ""): [Array<{ [key: string]: any }>, boolean] => {
-  const [data, setData] = useState<Array<{ [key: string]: any }>>([]);
+  const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (query == null) return;
     let url = typeof query === "string" ? query : query.url;
 
     const search = async () => {
