@@ -66,7 +66,16 @@ const Posts: React.FC = () => {
         width: '100%'
       }}
     >
-      <button className="btn btn-primary" onClick={handleSearchClick}>Search</button>
+      <div className="dropdown pull-right">
+        <button className="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+          Show Columns
+        </button>
+        <div className="dropdown-menu">
+          <a className="dropdown-item" href="#">Action</a>
+          <a className="dropdown-item" href="#">Another action</a>
+          <a className="dropdown-item" href="#">Something else here</a>
+        </div>
+      </div>
       <AgGridReact
         columnDefs={columnDefs}
         rowData={data}
