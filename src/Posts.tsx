@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AgGridReact } from '@ag-grid-community/react';
 import { AllCommunityModules, GridApi, GridReadyEvent } from '@ag-grid-community/all-modules';
+import Select from 'react-select';
 
 import { useSearch, SearchParams } from "./hooks/useSearch";
 
@@ -9,13 +10,15 @@ import '@ag-grid-community/all-modules/dist/styles/ag-theme-balham.css';
 
 
 const Posts: React.FC = () => {
-  const columnDefs = [{
+  const columnDefs: Array<{ [key: string]: string | boolean }> = [{
     headerName: "User", field: "username", sortable: true, filter: true
   }, {
     headerName: "Title", field: "title", sortable: true, filter: true
   }, {
     headerName: "Body", field: "body", sortable: true, filter: true
   }];
+
+  const options = columnDefs.map(column => ({ value: column.field, label: column.headerName }));
 
   const [query, setQuery] = useState<string | SearchParams>({
     url: "https://jsonplaceholder.typicode.com/posts",
@@ -29,7 +32,7 @@ const Posts: React.FC = () => {
   });
   const [data, loading] = useSearch(query);
 
-  const handleSearchClick = () => setQuery({
+  /* const handleSearchClick = () => setQuery({
     url: "https://jsonplaceholder.typicode.com/posts",
     joins: {
       select: "name",
@@ -38,13 +41,20 @@ const Posts: React.FC = () => {
       join: "id",
       on: "userId"
     }
-  });
+  }); */
 
 
   const gridApi = useRef<GridApi>();
   const onGridReady = (params: GridReadyEvent) => {
     gridApi.current = params.api;
   }
+
+  const handleOnSelectChange = (inputValue: any, { action }: { action: string }) => {
+
+    columnDefs.forEach(column => {
+      column.hide = options.every(option => option.value !== column.field);
+    });
+  };
 
   useEffect(() => {
     if (gridApi.current) {
@@ -59,31 +69,32 @@ const Posts: React.FC = () => {
   });
 
   return (
-    <div
-      className="ag-theme-balham"
-      style={{
-        height: '500px',
-        width: '100%'
-      }}
-    >
-      <div className="dropdown pull-right">
-        <button className="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-          Show Columns
-        </button>
-        <div className="dropdown-menu">
-          <a className="dropdown-item" href="#">Action</a>
-          <a className="dropdown-item" href="#">Another action</a>
-          <a className="dropdown-item" href="#">Something else here</a>
-        </div>
-      </div>
-      <AgGridReact
-        columnDefs={columnDefs}
-        rowData={data}
-        modules={AllCommunityModules}
-        onGridReady={onGridReady}
+    <div>
+      <Select
+        options={options}
+        defaultValue={options}
+        isMulti
+        closeMenuOnSelect={false}
+        blurInputOnSelect={false}
+        onChange={handleOnSelectChange}
+      />
+      <div
+        className="ag-theme-balham"
+        style={{
+          height: '500px',
+          width: '100%'
+        }}
       >
-      </AgGridReact>
+        <AgGridReact
+          columnDefs={columnDefs}
+          rowData={data}
+          modules={AllCommunityModules}
+          onGridReady={onGridReady}
+        >
+        </AgGridReact>
+      </div>
     </div>
+
   );
 };
 
