@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AgGridReact } from '@ag-grid-community/react';
-import { AllCommunityModules, GridApi, GridReadyEvent } from '@ag-grid-community/all-modules';
+import { AllCommunityModules, GridApi, GridReadyEvent, ColumnApi, ColDef, DragStoppedEvent } from '@ag-grid-community/all-modules';
 import Select from 'react-select';
 
 import { useSearch, SearchParams } from "./hooks/useSearch";
@@ -10,7 +10,7 @@ import '@ag-grid-community/all-modules/dist/styles/ag-theme-balham.css';
 
 
 const Posts: React.FC = () => {
-  const columnDefs: Array<{ [key: string]: string | boolean }> = [{
+  const columnDefs: Array<ColDef> = [{
     headerName: "User", field: "username", sortable: true, filter: true
   }, {
     headerName: "Title", field: "title", sortable: true, filter: true
@@ -18,7 +18,11 @@ const Posts: React.FC = () => {
     headerName: "Body", field: "body", sortable: true, filter: true
   }];
 
-  const options = columnDefs.map(column => ({ value: column.field, label: column.headerName }));
+  const options: Array<{ [key: string]: any }> = columnDefs
+    .filter(column => !column.hide)
+    .map(column => ({ value: column.field, label: column.headerName }));
+
+  const [selectedOptions, setSelectedOptions] = useState(options);
 
   const [query, setQuery] = useState<string | SearchParams>({
     url: "https://jsonplaceholder.typicode.com/posts",
@@ -32,28 +36,29 @@ const Posts: React.FC = () => {
   });
   const [data, loading] = useSearch(query);
 
-  /* const handleSearchClick = () => setQuery({
-    url: "https://jsonplaceholder.typicode.com/posts",
-    joins: {
-      select: "name",
-      as: "username",
-      from: "https://jsonplaceholder.typicode.com/users",
-      join: "id",
-      on: "userId"
-    }
-  }); */
-
-
   const gridApi = useRef<GridApi>();
+  const columnApi = useRef<ColumnApi>();
   const onGridReady = (params: GridReadyEvent) => {
     gridApi.current = params.api;
+    columnApi.current = params.columnApi;
   }
 
-  const handleOnSelectChange = (inputValue: any, { action }: { action: string }) => {
+  const handleOnSelectChange = (inputValue: any) => {
+    setSelectedOptions(inputValue);
 
     columnDefs.forEach(column => {
-      column.hide = options.every(option => option.value !== column.field);
+      let isSelected = inputValue.findIndex((option: any) => option.value === column.field) > -1;
+      columnApi.current && columnApi.current.setColumnVisible((column.field as string), isSelected);
     });
+  };
+
+  const handleColumnVisible = (event: DragStoppedEvent) => {
+    if (columnApi.current) {
+      setSelectedOptions(event.columnApi.getAllDisplayedColumns().map(column => {
+        let colDef = column.getColDef();
+        return { value: colDef.field, label: colDef.headerName };
+      }));
+    }
   };
 
   useEffect(() => {
@@ -70,14 +75,18 @@ const Posts: React.FC = () => {
 
   return (
     <div>
-      <Select
-        options={options}
-        defaultValue={options}
-        isMulti
-        closeMenuOnSelect={false}
-        blurInputOnSelect={false}
-        onChange={handleOnSelectChange}
-      />
+      <div className="my-3">
+        <Select
+          options={options}
+          isMulti
+          closeMenuOnSelect={false}
+          blurInputOnSelect={false}
+          onChange={handleOnSelectChange}
+          value={selectedOptions}
+        />
+
+      </div>
+
       <div
         className="ag-theme-balham"
         style={{
@@ -90,6 +99,7 @@ const Posts: React.FC = () => {
           rowData={data}
           modules={AllCommunityModules}
           onGridReady={onGridReady}
+          onDragStopped={handleColumnVisible}
         >
         </AgGridReact>
       </div>
