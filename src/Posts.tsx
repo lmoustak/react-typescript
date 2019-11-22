@@ -46,16 +46,16 @@ const Posts: React.FC = () => {
     columnApi.current = params.columnApi;
   }
 
-  const handleOnSelectChange = (inputValue: any) => {
-    setSelectedOptions(inputValue);
+  const handleOnSelectChange = (value: any) => {
+    setSelectedOptions(value);
 
     columnDefs.forEach(column => {
-      let isSelected = inputValue.findIndex((option: any) => option.value === column.field) > -1;
+      let isSelected = value.findIndex((option: any) => option.value === column.field) > -1;
       columnApi.current && columnApi.current.setColumnVisible((column.field as string), isSelected);
     });
   };
 
-  const handleColumnVisible = (event: DragStoppedEvent) => {
+  const handleColumnDragStopped = (event: DragStoppedEvent) => {
     if (columnApi.current) {
       setSelectedOptions(event.columnApi.getAllDisplayedColumns().map(column => {
         let colDef = column.getColDef();
@@ -79,14 +79,20 @@ const Posts: React.FC = () => {
   return (
     <div>
       <div className="my-3">
-        <Select
-          options={options}
-          isMulti
-          closeMenuOnSelect={false}
-          blurInputOnSelect={false}
-          onChange={handleOnSelectChange}
-          value={selectedOptions}
-        />
+        <form>
+         <div className="form-group">
+          <label html-for="visibleColumnSelect">Visible columns:</label>
+          <Select
+            id="visibleColumnSelect"
+            options={options}
+            isMulti
+            closeMenuOnSelect={false}
+            blurInputOnSelect={false}
+            onChange={handleOnSelectChange}
+            value={selectedOptions}
+          />
+         </div>
+        </form>
 
       </div>
 
@@ -102,7 +108,7 @@ const Posts: React.FC = () => {
           rowData={data}
           modules={AllCommunityModules}
           onGridReady={onGridReady}
-          onDragStopped={handleColumnVisible}
+          onDragStopped={handleColumnDragStopped}
         >
         </AgGridReact>
       </div>
