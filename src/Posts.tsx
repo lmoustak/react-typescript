@@ -50,8 +50,11 @@ const Posts: React.FC = () => {
     setSelectedOptions(value);
 
     columnDefs.forEach(column => {
-      let isSelected = value.findIndex((option: any) => option.value === column.field) > -1;
-      columnApi.current && columnApi.current.setColumnVisible((column.field as string), isSelected);
+      let colIndex = value.findIndex((option: any) => option.value === column.field);
+      if (columnApi.current) {
+        columnApi.current.moveColumn((column.field as string), colIndex);
+        columnApi.current.setColumnVisible((column.field as string), colIndex >= 0);
+      }
     });
   };
 
