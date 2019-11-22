@@ -19,10 +19,13 @@ const Posts: React.FC = () => {
   }];
 
   const options: Array<{ [key: string]: any }> = columnDefs
+    .map(column => ({ value: column.field, label: column.headerName }));
+
+  const defaultOptions: Array<{ [key: string]: any }> = columnDefs
     .filter(column => !column.hide)
     .map(column => ({ value: column.field, label: column.headerName }));
 
-  const [selectedOptions, setSelectedOptions] = useState(options);
+  const [selectedOptions, setSelectedOptions] = useState(defaultOptions);
 
   const [query, setQuery] = useState<string | SearchParams>({
     url: "https://jsonplaceholder.typicode.com/posts",
