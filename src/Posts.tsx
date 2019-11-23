@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AgGridReact } from '@ag-grid-community/react';
 import { AllCommunityModules, GridApi, GridReadyEvent, ColumnApi, ColDef, DragStoppedEvent } from '@ag-grid-community/all-modules';
 import Select from 'react-select';
+import axios from "axios";
 
-import { useSearch, SearchParams } from "./hooks/useSearch";
+import { useSearch, SearchParams, AnyObject } from "./hooks/useSearch";
 
 import '@ag-grid-community/all-modules/dist/styles/ag-grid.css';
 import '@ag-grid-community/all-modules/dist/styles/ag-theme-balham.css';
@@ -11,6 +12,8 @@ import '@ag-grid-community/all-modules/dist/styles/ag-theme-balham.css';
 
 const Posts: React.FC = () => {
   const columnDefs: Array<ColDef> = [{
+    checkboxSelection: true, headerCheckboxSelection: true, width: 35
+  }, {
     headerName: "User", field: "username", sortable: true, filter: true
   }, {
     headerName: "Title", field: "title", sortable: true, filter: true
@@ -18,11 +21,12 @@ const Posts: React.FC = () => {
     headerName: "Body", field: "body", sortable: true, filter: true
   }];
 
-  const options: Array<{ [key: string]: any }> = columnDefs
+  const options: Array<AnyObject> = columnDefs
+    .filter(column => column.headerName)
     .map(column => ({ value: column.field, label: column.headerName }));
 
-  const defaultOptions: Array<{ [key: string]: any }> = columnDefs
-    .filter(column => !column.hide)
+  const defaultOptions: Array<AnyObject> = columnDefs
+    .filter(column => column.headerName && !column.hide)
     .map(column => ({ value: column.field, label: column.headerName }));
 
   const [selectedOptions, setSelectedOptions] = useState(defaultOptions);
@@ -37,13 +41,13 @@ const Posts: React.FC = () => {
       on: "userId"
     }
   });
-  const [data, loading] = useSearch(query);
+  const [data, setData, loading] = useSearch(query);
 
-  const gridApi = useRef<GridApi>();
-  const columnApi = useRef<ColumnApi>();
+  const [gridApi, setGridApi] = useState<GridApi>();
+  const [columnApi, setColumnApi] = useState<ColumnApi>();
   const onGridReady = (params: GridReadyEvent) => {
-    gridApi.current = params.api;
-    columnApi.current = params.columnApi;
+    setGridApi(params.api);
+    setColumnApi(params.columnApi);
   }
 
   const handleOnSelectChange = (value: any) => {
@@ -51,15 +55,15 @@ const Posts: React.FC = () => {
 
     columnDefs.forEach(column => {
       let colIndex = value.findIndex((option: any) => option.value === column.field);
-      if (columnApi.current) {
-        columnApi.current.moveColumn((column.field as string), colIndex);
-        columnApi.current.setColumnVisible((column.field as string), colIndex >= 0);
+      if (columnApi) {
+        columnApi.moveColumn((column.field as string), colIndex);
+        columnApi.setColumnVisible((column.field as string), colIndex >= 0);
       }
     });
   };
 
   const handleColumnDragStopped = (event: DragStoppedEvent) => {
-    if (columnApi.current) {
+    if (columnApi) {
       setSelectedOptions(event.columnApi.getAllDisplayedColumns().map(column => {
         let colDef = column.getColDef();
         return { value: colDef.field, label: colDef.headerName };
@@ -68,33 +72,63 @@ const Posts: React.FC = () => {
   };
 
   useEffect(() => {
-    if (gridApi.current) {
+    if (gridApi) {
       if (loading) {
-        gridApi.current.showLoadingOverlay();
+        gridApi.showLoadingOverlay();
       } else if (!data.length) {
-        gridApi.current.showNoRowsOverlay();
+        gridApi.showNoRowsOverlay();
       } else {
-        gridApi.current.hideOverlay();
+        gridApi.hideOverlay();
       }
     }
   });
+
+  const deleteSelected = async () => {
+    if (gridApi) {
+      let selectedNodes = gridApi.getSelectedNodes();
+      let removedIds: Array<number> = [];
+
+      await Promise.all(selectedNodes.map(async ({ data }) => {
+        try {
+          await axios.delete(`https://jsonplaceholder.typicode.com/posts/${data.id}`);
+          removedIds.push(data.id);
+          //setData((prevData: Array<AnyObject>) => prevData.slice(1));
+        } catch (err) {
+          console.error(err);
+        }
+      }));
+
+      setData((prevData: Array<AnyObject>) => prevData.filter(({ id }) => !removedIds.includes(id)));
+    }
+
+  };
 
   return (
     <div>
       <div className="my-3">
         <form>
-         <div className="form-group">
-          <label html-for="visibleColumnSelect">Visible columns:</label>
-          <Select
-            id="visibleColumnSelect"
-            options={options}
-            isMulti
-            closeMenuOnSelect={false}
-            blurInputOnSelect={false}
-            onChange={handleOnSelectChange}
-            value={selectedOptions}
-          />
-         </div>
+          <div className="form-group">
+            <label html-for="visibleColumnSelect">Visible columns:</label>
+            <Select
+              id="visibleColumnSelect"
+              options={options}
+              isMulti
+              closeMenuOnSelect={false}
+              blurInputOnSelect={false}
+              onChange={handleOnSelectChange}
+              value={selectedOptions}
+            />
+          </div>
+
+          <div className="form-group">
+            <button
+              type="button"
+              className="btn btn-danger"
+              onClick={deleteSelected}
+            >
+              Delete selected
+          </button>
+          </div>
         </form>
 
       </div>
@@ -110,6 +144,9 @@ const Posts: React.FC = () => {
           columnDefs={columnDefs}
           rowData={data}
           modules={AllCommunityModules}
+          pagination
+          paginationAutoPageSize
+          rowSelection="multiple"
           onGridReady={onGridReady}
           onDragStopped={handleColumnDragStopped}
         >
