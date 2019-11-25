@@ -26,7 +26,9 @@
     "react-scripts": "3.2.0",
     "react-select": "^3.0.8",
     "react-sortable-hoc": "^1.10.1",
+    "react-tabtab": "^2.0.0",
     "react-transition-group": "^4.3.0",
+    "styled-components": "^4.0.0",
     "typescript": "3.6.4"
   },
   "scripts": {

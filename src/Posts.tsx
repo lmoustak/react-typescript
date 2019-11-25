@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AgGridReact } from '@ag-grid-community/react';
-import { AllCommunityModules, GridApi, GridReadyEvent, ColumnApi, ColDef, DragStoppedEvent } from '@ag-grid-community/all-modules';
+import { AllCommunityModules, GridApi, GridReadyEvent, ColumnApi, ColDef, DragStoppedEvent, ICellRendererParams, GridOptions } from '@ag-grid-community/all-modules';
 import Select from 'react-select';
 import axios from "axios";
+import {Tabs, TabList, Tab, PanelList, Panel} from 'react-tabtab';
+import * as bulmaStyle from 'react-tabtab/lib/themes/bulma'
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 import { useSearch, SearchParams, AnyObject } from "./hooks/useSearch";
 
@@ -21,14 +24,32 @@ const Posts: React.FC = () => {
     headerName: "Title", field: "title", sortable: true, filter: true
   }, {
     headerName: "Body", field: "body", sortable: true, filter: true
+  }, {
+    headerName: "Actions", width: 125, sortable: false, pinned: "right", lockPinned: true, cellRenderer: "actionsCellRenderer"
   }];
 
+  const gridOptions: GridOptions = {
+    columnDefs,
+    rowHeight: 35,
+    frameworkComponents: {
+      actionsCellRenderer: (params: ICellRendererParams) => (
+        <div className="btn-group btn-group-sm">
+          <button type="button" className="btn btn-primary" onClick={() => console.log(params.data)} title="View"><FontAwesomeIcon fixedWidth icon="eye" /></button>
+          <button type="button" className="btn btn-secondary" onClick={() => console.log(params.data)} title="Edit"><FontAwesomeIcon fixedWidth icon="edit" /></button>
+          <button type="button" className="btn btn-danger" onClick={() => console.log(params.data)} title="Delete"><FontAwesomeIcon fixedWidth icon="times" /></button>
+        </div>
+      )
+    }
+  };
+
+  
+
   const options: Array<AnyObject> = columnDefs
-    .filter(column => column.headerName)
+    .filter(column => column.headerName && !column.lockPinned)
     .map(column => ({ value: column.field, label: column.headerName }));
 
   const defaultOptions: Array<AnyObject> = columnDefs
-    .filter(column => column.headerName && !column.hide)
+    .filter(column => column.headerName && !column.hide && !column.lockPinned)
     .map(column => ({ value: column.field, label: column.headerName }));
 
   const [selectedOptions, setSelectedOptions] = useState(defaultOptions);
@@ -67,7 +88,7 @@ const Posts: React.FC = () => {
   const handleColumnDragStopped = (event: DragStoppedEvent) => {
     if (columnApi) {
       setSelectedOptions(event.columnApi.getAllDisplayedColumns()
-        .filter(column => column.getColDef().headerName)
+        .filter(column => column.getColDef().headerName  && !column.getColDef().lockPinned)
         .map(column => {
           let colDef = column.getColDef();
           return { value: colDef.field, label: colDef.headerName };
@@ -109,55 +130,87 @@ const Posts: React.FC = () => {
 
   return (
     <div>
-      <div className="my-3">
-        <form>
-          <div className="form-group">
-            <label html-for="visibleColumnSelect">Visible columns:</label>
-            <Select
-              id="visibleColumnSelect"
-              options={options}
-              isMulti
-              closeMenuOnSelect={false}
-              blurInputOnSelect={false}
-              onChange={handleOnSelectChange}
-              value={selectedOptions}
-            />
-          </div>
+      <Tabs customStyle={bulmaStyle}>
+        <TabList>
+          <Tab>
+            <FontAwesomeIcon icon="search" /> Results
+          </Tab>
+          <Tab closable>
+            View
+          </Tab>
+        </TabList>
+        <PanelList>
+          <Panel>
+            <div className="my-3">
+              <form>
+                <div className="form-group">
+                  <label html-for="visibleColumnSelect">Visible columns:</label>
+                  <Select
+                    id="visibleColumnSelect"
+                    options={options}
+                    isMulti
+                    closeMenuOnSelect={false}
+                    blurInputOnSelect={false}
+                    onChange={handleOnSelectChange}
+                    value={selectedOptions}
+                  />
+                </div>
 
-          <div className="form-group">
-            <button
-              type="button"
-              className="btn btn-danger"
-              onClick={deleteSelected}
-            >
-              Delete selected
-          </button>
-          </div>
-        </form>
+                <div className="form-group">
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={deleteSelected}
+                  >
+                    Delete selected
+                </button>
+                </div>
+              </form>
 
-      </div>
+              <div
+                className="ag-theme-balham"
+                style={{
+                  height: '500px',
+                  width: '100%'
+                }}
+              >
+                <AgGridReact
+                  gridOptions={gridOptions}
+                  rowData={data}
+                  modules={AllCommunityModules}
+                  pagination
+                  paginationAutoPageSize
+                  rowSelection="multiple"
+                  onGridReady={onGridReady}
+                  onDragStopped={handleColumnDragStopped}
+                >
+                </AgGridReact>
+              </div>
 
-      <div
-        className="ag-theme-balham"
-        style={{
-          height: '500px',
-          width: '100%'
-        }}
-      >
-        <AgGridReact
-          columnDefs={columnDefs}
-          rowData={data}
-          modules={AllCommunityModules}
-          pagination
-          paginationAutoPageSize
-          rowSelection="multiple"
-          onGridReady={onGridReady}
-          onDragStopped={handleColumnDragStopped}
-        >
-        </AgGridReact>
-      </div>
+            </div>
+          </Panel>
+
+          <Panel>
+            {data && <View data={data[0]} />}
+          </Panel>
+        </PanelList>
+      </Tabs>
+
+      
     </div>
 
+  );
+};
+
+const View: React.FC<AnyObject> = (props: AnyObject) => {
+  const data = props.data;
+  return (
+    <div>
+      <p>UserId: {data.userId}</p>
+      <p>Username: {data.username}</p>
+      <p>Title: {data.title}</p>
+      <p>Body: {data.body}</p>
+    </div>
   );
 };
 
