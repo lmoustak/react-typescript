@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AgGridReact } from '@ag-grid-community/react';
 import { AllCommunityModules, GridApi, GridReadyEvent, ColumnApi, ColDef, DragStoppedEvent } from '@ag-grid-community/all-modules';
 import Select from 'react-select';
@@ -10,12 +10,11 @@ import '@ag-grid-community/all-modules/dist/styles/ag-grid.css';
 import '@ag-grid-community/all-modules/dist/styles/ag-theme-balham.css';
 import '@ag-grid-community/all-modules/dist/styles/ag-theme-balham-dark.css';
 import '@ag-grid-community/all-modules/dist/styles/ag-theme-material.css';
-import '@ag-grid-community/all-modules/dist/styles/ag-theme-fresh.css';
 
 
 const Posts: React.FC = () => {
   const columnDefs: Array<ColDef> = [{
-    checkboxSelection: true, headerCheckboxSelection: true, width: 60, lockPosition: true, lockVisible: true
+    checkboxSelection: true, headerCheckboxSelection: true, width: 40, lockPosition: true, lockVisible: true
   }, {
     headerName: "User", field: "username", sortable: true, filter: true
   }, {
