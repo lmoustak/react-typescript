@@ -8,11 +8,14 @@ import { useSearch, SearchParams, AnyObject } from "./hooks/useSearch";
 
 import '@ag-grid-community/all-modules/dist/styles/ag-grid.css';
 import '@ag-grid-community/all-modules/dist/styles/ag-theme-balham.css';
+import '@ag-grid-community/all-modules/dist/styles/ag-theme-balham-dark.css';
+import '@ag-grid-community/all-modules/dist/styles/ag-theme-material.css';
+import '@ag-grid-community/all-modules/dist/styles/ag-theme-fresh.css';
 
 
 const Posts: React.FC = () => {
   const columnDefs: Array<ColDef> = [{
-    checkboxSelection: true, headerCheckboxSelection: true, width: 35
+    checkboxSelection: true, headerCheckboxSelection: true, width: 60, lockPosition: true, lockVisible: true
   }, {
     headerName: "User", field: "username", sortable: true, filter: true
   }, {
@@ -64,10 +67,12 @@ const Posts: React.FC = () => {
 
   const handleColumnDragStopped = (event: DragStoppedEvent) => {
     if (columnApi) {
-      setSelectedOptions(event.columnApi.getAllDisplayedColumns().map(column => {
-        let colDef = column.getColDef();
-        return { value: colDef.field, label: colDef.headerName };
-      }));
+      setSelectedOptions(event.columnApi.getAllDisplayedColumns()
+        .filter(column => column.getColDef().headerName)
+        .map(column => {
+          let colDef = column.getColDef();
+          return { value: colDef.field, label: colDef.headerName };
+        }));
     }
   };
 
