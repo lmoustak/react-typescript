@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import ReactMarkdown from 'react-markdown';
-import {Row, Col, Navbar, NavbarBrand, Nav, NavItem, Container} from "reactstrap";
+import { Row, Col, Navbar, NavbarBrand, Nav, NavItem, Container } from "reactstrap";
 
 import './App.css';
 import './styles.css'

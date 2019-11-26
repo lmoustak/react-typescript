@@ -4,7 +4,7 @@ import { AllCommunityModules, GridApi, GridReadyEvent, ColumnApi, ColDef, DragSt
 import Select from 'react-select';
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, ButtonGroup, Nav, NavItem, NavLink, TabContent, TabPane } from 'reactstrap';
+import { Button, ButtonGroup, Nav, NavItem, NavLink, TabContent, TabPane, Table, Badge } from 'reactstrap';
 import classnames from "classnames";
 
 import { useSearch, SearchParams, AnyObject } from "./hooks/useSearch";
@@ -161,28 +161,28 @@ const Posts: React.FC = () => {
   });
 
   return (
-    <GridContext.Provider value={{openNewTab, deleteRows}}>
+    <GridContext.Provider value={{ openNewTab, deleteRows }}>
       <div className="mt-5">
         <Nav tabs>
           <NavItem>
             <NavLink
-              className={classnames({active: activeTab === "Results"})}
+              className={classnames({ active: activeTab === "Results" })}
               onClick={() => setActiveTab("Results")}
+              style={{ cursor: "pointer" }}
             >
               <FontAwesomeIcon icon="search" /> Results
             </NavLink>
           </NavItem>
           {
-            extraTabs.map(tab => (
-              <NavItem key={tab.id} className="animated fadeIn">
-                <NavLink
-                  className= {classnames({active: activeTab === tab.id.toString()})}
-                  onClick={() => setActiveTab(tab.id.toString())}
-                >
-                  {tab.id.toString()} <FontAwesomeIcon icon="times" size="sm" onClick={event => handleCloseTab(tab.id.toString(), event)} />
-                </NavLink>
-              </NavItem>
-            ))
+            extraTabs.map(tab =>
+              <ExtraTab
+                key={tab.id}
+                tabId={tab.id}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                handleCloseTab={handleCloseTab}
+              />
+            )
           }
         </Nav>
 
@@ -254,23 +254,66 @@ const Posts: React.FC = () => {
 
 const ActionsCellRenderer = (props: ICellRendererParams) => {
   const context: AnyObject = useContext(GridContext);
+  const { data } = props;
   return (
     <ButtonGroup size="sm">
-      <Button width="50px" color="primary" onClick={() => context.openNewTab(props.data)}><FontAwesomeIcon icon="eye" /> View</Button>
-      <Button width="50px" color="secondary" onClick={() => console.log(props.data)}><FontAwesomeIcon icon="edit" /> Edit</Button>
-      <Button width="50px" color="danger" onClick={() => context.deleteRows([props.data])}><FontAwesomeIcon icon="trash" /> Delete</Button>
+      <Button width="50px" color="primary" onClick={() => context.openNewTab(data)}><FontAwesomeIcon icon="eye" /> View</Button>
+      <Button width="50px" color="primary" onClick={() => console.log(data)}><FontAwesomeIcon icon="edit" /> Edit</Button>
+      <Button width="50px" color="danger" onClick={() => context.deleteRows([data])}><FontAwesomeIcon icon="trash" /> Delete</Button>
     </ButtonGroup>
   );
 };
 
+const ExtraTab: React.FC<any> = props => {
+  const { tabId, activeTab, setActiveTab, handleCloseTab } = props;
+
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <NavItem className="animated fadeIn">
+      <NavLink
+        className={classnames({ active: activeTab === tabId.toString() })}
+        onClick={() => setActiveTab(tabId.toString())}
+        style={{ cursor: "pointer" }}
+      >
+        {tabId.toString()} <Badge color="info">View</Badge>&nbsp;
+        <FontAwesomeIcon
+          icon="times"
+          size="sm"
+          onClick={event => handleCloseTab(tabId.toString(), event)}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          style={isHovered ? { color: "red" } : { color: "initial" }}
+        />
+      </NavLink>
+    </NavItem>
+  );
+};
+
 const View: React.FC<AnyObject> = (props: AnyObject) => {
-  const data = props.data;
+  const { data } = props;
   return (
     <div>
-      <p>UserId: {data.userId}</p>
-      <p>Username: {data.username}</p>
-      <p>Title: {data.title}</p>
-      <p>Body: {data.body}</p>
+      <Table striped>
+        <tbody>
+          <tr>
+            <th>User Id</th>
+            <td>{data.userId}</td>
+          </tr>
+          <tr>
+            <th>Username</th>
+            <td>{data.username}</td>
+          </tr>
+          <tr>
+            <th>Title</th>
+            <td>{data.title}</td>
+          </tr>
+          <tr>
+            <th>Body</th>
+            <td>{data.body}</td>
+          </tr>
+        </tbody>
+      </Table>
     </div>
   );
 };
