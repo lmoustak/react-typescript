@@ -47,8 +47,7 @@ export interface SearchParams {
  *
  * @retuns The [data, loading] tuple
  */
-const useSearch = (query: string | SearchParams = ""):
-  [Array<AnyObject>, React.Dispatch<AnyObject>, boolean] => {
+const useSearch = (query: string | SearchParams = ""): [Array<AnyObject>, boolean] => {
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
 
@@ -146,7 +145,7 @@ const useSearch = (query: string | SearchParams = ""):
 
   }, [query]);
 
-  return [data, setData, loading];
+  return [data, loading];
 };
 
 export { useSearch };

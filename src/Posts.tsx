@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { AgGridReact } from '@ag-grid-community/react';
-import { AllCommunityModules, GridApi, GridReadyEvent, ColumnApi, ColDef, DragStoppedEvent, ICellRendererParams, GridOptions } from '@ag-grid-community/all-modules';
+import { AllCommunityModules, GridApi, GridReadyEvent, ColumnApi, ColDef, DragStoppedEvent, GridOptions, ICellRendererParams } from '@ag-grid-community/all-modules';
 import Select from 'react-select';
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,6 +14,7 @@ import '@ag-grid-community/all-modules/dist/styles/ag-theme-balham.css';
 import '@ag-grid-community/all-modules/dist/styles/ag-theme-balham-dark.css';
 import '@ag-grid-community/all-modules/dist/styles/ag-theme-material.css';
 
+const GridContext: React.Context<AnyObject> = React.createContext<AnyObject>({});
 
 const Posts: React.FC = () => {
   const [extraTabs, setExtraTabs] = useState<Array<AnyObject>>([]);
@@ -43,7 +44,9 @@ const Posts: React.FC = () => {
   };
 
   const openNewTab = (row: AnyObject) => {
-    setExtraTabs(prevTabs => [...prevTabs, row]);
+    if (!extraTabs.find(tab => tab.id.toString() === row.id.toString())) {
+      setExtraTabs(prevTabs => [...prevTabs, row]);
+    }
     setActiveTab(row.id.toString());
   };
 
@@ -52,11 +55,10 @@ const Posts: React.FC = () => {
 
     if (tabIndex > -1) {
       if (activeTab === tabId) {
-        let newTabId = tabIndex === 0 ? "Results" : extraTabs[tabIndex - 1].id;
+        let newTabId = tabIndex === 0 ? "Results" : extraTabs[tabIndex - 1].id.toString();
         setActiveTab(newTabId);
       }
       setExtraTabs(prevTabs => [...prevTabs.slice(0, tabIndex), ...prevTabs.slice(tabIndex + 1)]);
-      console.log(activeTab);
     }
   };
 
@@ -88,13 +90,7 @@ const Posts: React.FC = () => {
     rowHeight: 35,
     suppressRowClickSelection: true,
     frameworkComponents: {
-      actionsCellRenderer: (params: ICellRendererParams) => (
-        <ButtonGroup size="sm">
-          <Button width="50px" color="primary" onClick={() => openNewTab(params.data)}><FontAwesomeIcon icon="eye" /> View</Button>
-          <Button width="50px" color="secondary" onClick={() => console.log(params.data)}><FontAwesomeIcon icon="edit" /> Edit</Button>
-          <Button width="50px" color="danger" onClick={() => deleteRows([params.data])}><FontAwesomeIcon icon="trash" /> Delete</Button>
-        </ButtonGroup>
-      )
+      actionsCellRenderer: ActionsCellRenderer
     }
   };
 
@@ -110,6 +106,7 @@ const Posts: React.FC = () => {
 
   const [selectedOptions, setSelectedOptions] = useState(defaultOptions);
 
+  // eslint-disable-next-line
   const [query, setQuery] = useState<string | SearchParams>({
     url: "https://jsonplaceholder.typicode.com/posts",
     joins: {
@@ -120,7 +117,7 @@ const Posts: React.FC = () => {
       on: "userId"
     }
   });
-  const [data, setData, loading] = useSearch(query);
+  const [data, loading] = useSearch(query);
 
   const gridApi = useRef<GridApi>();
   const columnApi = useRef<ColumnApi>();
@@ -164,91 +161,105 @@ const Posts: React.FC = () => {
   });
 
   return (
-    <div className="mt-5">
-      <Nav tabs>
-        <NavItem>
-          <NavLink
-            className={classnames({active: activeTab === "Results"})}
-            onClick={() => setActiveTab("Results")}
-          >
-            <FontAwesomeIcon icon="search" /> Results
-          </NavLink>
-        </NavItem>
-        {
-          extraTabs.map(tab => (
-            <NavItem key={tab.id}>
-              <NavLink
-                className= {classnames({active: activeTab === tab.id.toString()})}
-                onClick={() => setActiveTab(tab.id.toString())}
-              >
-                {tab.id.toString()} <FontAwesomeIcon icon="times" onClick={event => handleCloseTab(tab.id.toString(), event)} />
-              </NavLink>
-            </NavItem>
-          ))
-        }
-      </Nav>
-
-      <TabContent activeTab={activeTab}>
-        <TabPane tabId="Results">
-          <div className="my-3">
-            <form>
-              <div className="form-group">
-                <label html-for="visibleColumnSelect">Visible columns:</label>
-                <Select
-                  id="visibleColumnSelect"
-                  options={options}
-                  isMulti
-                  closeMenuOnSelect={false}
-                  blurInputOnSelect={false}
-                  onChange={handleOnSelectChange}
-                  value={selectedOptions}
-                />
-              </div>
-
-              <div className="form-group">
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={() => deleteSelected()}
-                >
-                  Delete selected
-              </button>
-              </div>
-            </form>
-
-            <div
-              className="ag-theme-balham"
-              style={{
-                height: '500px',
-                width: '100%'
-              }}
+    <GridContext.Provider value={{openNewTab, deleteRows}}>
+      <div className="mt-5">
+        <Nav tabs>
+          <NavItem>
+            <NavLink
+              className={classnames({active: activeTab === "Results"})}
+              onClick={() => setActiveTab("Results")}
             >
-              <AgGridReact
-                gridOptions={gridOptions}
-                rowData={data}
-                modules={AllCommunityModules}
-                animateRows
-                pagination
-                paginationAutoPageSize
-                rowSelection="multiple"
-                onGridReady={onGridReady}
-                onDragStopped={handleColumnDragStopped}
+              <FontAwesomeIcon icon="search" /> Results
+            </NavLink>
+          </NavItem>
+          {
+            extraTabs.map(tab => (
+              <NavItem key={tab.id} className="animated fadeIn">
+                <NavLink
+                  className= {classnames({active: activeTab === tab.id.toString()})}
+                  onClick={() => setActiveTab(tab.id.toString())}
+                >
+                  {tab.id.toString()} <FontAwesomeIcon icon="times" size="sm" onClick={event => handleCloseTab(tab.id.toString(), event)} />
+                </NavLink>
+              </NavItem>
+            ))
+          }
+        </Nav>
+
+        <TabContent activeTab={activeTab}>
+          <TabPane tabId="Results">
+            <div className="my-3">
+              <form>
+                <div className="form-group">
+                  <label html-for="visibleColumnSelect">Visible columns:</label>
+                  <Select
+                    id="visibleColumnSelect"
+                    options={options}
+                    isMulti
+                    closeMenuOnSelect={false}
+                    blurInputOnSelect={false}
+                    onChange={handleOnSelectChange}
+                    value={selectedOptions}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={() => deleteSelected()}
+                  >
+                    Delete selected
+                </button>
+                </div>
+              </form>
+
+              <div
+                className="ag-theme-balham"
+                style={{
+                  height: '500px',
+                  width: '100%'
+                }}
               >
-              </AgGridReact>
+                <AgGridReact
+                  gridOptions={gridOptions}
+                  rowData={data}
+                  modules={AllCommunityModules}
+                  animateRows
+                  pagination
+                  paginationAutoPageSize
+                  rowSelection="multiple"
+                  onGridReady={onGridReady}
+                  onDragStopped={handleColumnDragStopped}
+                >
+                </AgGridReact>
+              </div>
+
             </div>
+          </TabPane>
+          {
+            extraTabs.map(tab => (
+              <TabPane key={tab.id} tabId={tab.id.toString()}>
+                <View data={tab} />
+              </TabPane>
+            ))
+          }
+        </TabContent>
+      </div>
 
-          </div>
-        </TabPane>
-        {
-          extraTabs.map(tab => (
-            <TabPane key={tab.id} tabId={tab.id.toString()}>
-              <View data={tab} />
-            </TabPane>
-          ))
-        }
-      </TabContent>
-    </div>
+    </GridContext.Provider>
 
+  );
+};
+
+const ActionsCellRenderer = (props: ICellRendererParams) => {
+  const context: AnyObject = useContext(GridContext);
+  return (
+    <ButtonGroup size="sm">
+      <Button width="50px" color="primary" onClick={() => context.openNewTab(props.data)}><FontAwesomeIcon icon="eye" /> View</Button>
+      <Button width="50px" color="secondary" onClick={() => console.log(props.data)}><FontAwesomeIcon icon="edit" /> Edit</Button>
+      <Button width="50px" color="danger" onClick={() => context.deleteRows([props.data])}><FontAwesomeIcon icon="trash" /> Delete</Button>
+    </ButtonGroup>
   );
 };
 
