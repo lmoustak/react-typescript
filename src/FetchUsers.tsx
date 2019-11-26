@@ -3,6 +3,7 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import User from './interfaces/User';
+import { Table, InputGroup, Input, InputGroupAddon, Button } from 'reactstrap';
 
 interface UserProps {
   users: Array<User>
@@ -91,42 +92,40 @@ const FetchUsers: React.FC = () => {
       {loading
         ? (<div className="text-center"><FontAwesomeIcon icon="spinner" pulse size="8x"/></div>)
         : (
-          <div className="table-responsive-lg">
-            <table className="table table-striped">
-              <thead>
-                <tr>
-                  <th scope="col">Id</th>
-                  <th scope="col">
-                    <div className="input-group">
-                      <input type="text" className="form-control" value={nameFilter} placeholder="Name" onChange={handleUsersNameFilterChange} />
-                      <div className="input-group-append">
-                        <button type="button" className="btn btn-outline-secondary" onClick={handleUsersNameFilterClearClick}><FontAwesomeIcon icon="times" /></button>
-                      </div>
-                    </div>
-                  </th>
-                  <th scope="col">
-                    <div className="input-group">
-                      <input type="text" className="form-control" value={usernameFilter} placeholder="Username" onChange={handleUsersUsernameFilterChange} />
-                      <div className="input-group-append">
-                        <button type="button" className="btn btn-outline-secondary" onClick={handleUsersUsernameFilterClearClick}><FontAwesomeIcon icon="times" /></button>
-                      </div>
-                    </div>
-                  </th>
-                  <th scope="col">
-                    <div className="input-group">
-                      <input type="text" className="form-control" value={emailFilter} placeholder="Email" onChange={handleUsersEmailFilterChange} />
-                      <div className="input-group-append">
-                        <button type="button" className="btn btn-outline-secondary" onClick={handleUsersEmailFilterClearClick}><FontAwesomeIcon icon="times" /></button>
-                      </div>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filterUsers(nameFilter, usernameFilter, emailFilter)}
-              </tbody>
-            </table>
-          </div>
+          <Table striped>
+            <thead>
+              <tr>
+                <th scope="col">Id</th>
+                <th scope="col">
+                  <InputGroup>
+                    <Input type="text" name="nameFilter" value={nameFilter} placeholder="Name" onChange={handleUsersNameFilterChange} />
+                    <InputGroupAddon addonType="append">
+                      <Button color="secondary" outline onClick={handleUsersNameFilterClearClick}><FontAwesomeIcon icon="times" /></Button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </th>
+                <th scope="col">
+                  <InputGroup>
+                    <Input type="text" name="usernameFilter" value={usernameFilter} placeholder="Username" onChange={handleUsersUsernameFilterChange} />
+                    <InputGroupAddon addonType="append">
+                      <Button color="secondary" outline onClick={handleUsersUsernameFilterClearClick}><FontAwesomeIcon icon="times" /></Button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </th>
+                <th scope="col">
+                  <InputGroup>
+                    <Input type="text" name="emailFilter" value={emailFilter} placeholder="Email" onChange={handleUsersEmailFilterChange} />
+                    <InputGroupAddon addonType="append">
+                      <Button color="secondary" outline onClick={handleUsersEmailFilterClearClick}><FontAwesomeIcon icon="times" /></Button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filterUsers(nameFilter, usernameFilter, emailFilter)}
+            </tbody>
+          </Table>
           )
       }
     </div>

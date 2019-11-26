@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Row, Col, Button, FormGroup, Label, Input } from 'reactstrap';
 
 const Counter: React.FC = () => {
   const [counter, setCounter] = useState(0);
@@ -12,26 +13,24 @@ const Counter: React.FC = () => {
   const handleStepChange = (event: React.ChangeEvent<HTMLInputElement>) => setStep(event.target.valueAsNumber || 1);
 
   return (
-    <div className="row mt-5">
-      <div className="col-4"></div>
-      <div className="col-4">
+    <Row className="mt-5">
+      <Col xs={12} md={{size: 4, offset: 4}}>
         <p>Current counter value: {counter}</p>
-        <button className="btn btn-primary btn-sm" onClick={handleResetClick}>Reset</button>
-        <form className="form-group mt-5">
-          <label>Step value: <input type="number" className="form-control" min="1" value={step} onChange={handleStepChange}/></label>
-        </form>
+        <Button color="primary" size="sm" onClick={handleResetClick}>Reset</Button>
+        <FormGroup className="mt-5">
+          <Label>Step value: <Input type="number" name="step" className="form-control" min="1" value={step} onChange={handleStepChange}/></Label>
+        </FormGroup>
         {
           !isNaN(step) &&
           (
             <div>
-              <button type="button" className="btn btn-primary mr-3" onClick={handleIncrementClick}>Increment by {step}</button>
-              <button type="button" className="btn btn-primary" onClick={handleDecrementClick}>Decrement by {step}</button>
+              <Button color="primary" size="sm" className="mr-3" onClick={handleIncrementClick}>Increment by {step}</Button>
+              <Button color="primary" size="sm" onClick={handleDecrementClick}>Decrement by {step}</Button>
             </div>
           )
         }
-      </div>
-      <div className="col-4"></div>
-    </div>
+      </Col>
+    </Row>
   );
 }
 

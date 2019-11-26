@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import ReactMarkdown from 'react-markdown';
+import {Row, Col, Navbar, NavbarBrand, Nav, NavItem, Container} from "reactstrap";
 
 import './App.css';
 import './styles.css'
@@ -33,36 +34,36 @@ const AnimatedPages: React.FC = () => {
 ### Select one of the top links to begin`;
 
   const startScreen = (
-    <div className="row mt-5">
-      <div className="col-12">
+    <Row className="mt-5">
+      <Col xs={12}>
         <ReactMarkdown source={markdown} />
-      </div>
-    </div>
+      </Col>
+    </Row>
   );
 
   return (
     <div>
-      <nav className="navbar navbar-expand-sm navbar-light bg-light">
-        <div className="navbar-brand">React playground</div>
-        <ul className="navbar-nav mr-auto">
-          <li className="nav-item">
+      <Navbar color="light" light expand="sm">
+        <NavbarBrand>React playground</NavbarBrand>
+        <Nav navbar className="mr-auto">
+          <NavItem>
             <NavLink className="nav-link" to="/" exact>Home</NavLink>
-          </li>
-          <li className="nav-item">
+          </NavItem>
+          <NavItem>
             <NavLink className="nav-link" to="/counter">Counter</NavLink>
-          </li>
-          <li className="nav-item">
+          </NavItem>
+          <NavItem>
             <NavLink className="nav-link" to="/users">Users</NavLink>
-          </li>
-          <li className="nav-item">
+          </NavItem>
+          <NavItem>
             <NavLink className="nav-link" to="/posts">Posts</NavLink>
-          </li>
-        </ul>
-      </nav>
+          </NavItem>
+        </Nav>
+      </Navbar>
 
       {/* A <Switch> looks through its children <Route>s and
           renders the first one that matches the current URL. */}
-      <div className="container text-center">
+      <Container className="text-center">
         <TransitionGroup>
           <CSSTransition key={location.key}
             classNames="page"
@@ -93,7 +94,7 @@ const AnimatedPages: React.FC = () => {
 
           </CSSTransition>
         </TransitionGroup>
-      </div>
+      </Container>
 
     </div>
   );
