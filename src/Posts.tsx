@@ -72,22 +72,42 @@ const Posts: React.FC = () => {
 
 
   const columnDefs: Array<ColDef> = [{
-    checkboxSelection: true, headerCheckboxSelection: true, width: 40, suppressSizeToFit: true, lockPosition: true, lockVisible: true, sortable: false, resizable: false, filter: false
+    checkboxSelection: true,
+    headerCheckboxSelection: true,
+    width: 40,
+    suppressSizeToFit: true,
+    lockPosition: true,
+    lockVisible: true,
+    sortable: false,
+    resizable: false,
+    filter: false
   }, {
-    headerName: "User", field: "username"
+    headerName: "User",
+    field: "username"
   }, {
-    headerName: "Title", field: "title"
+    headerName: "Title",
+    field: "title"
   }, {
-    headerName: "Body", field: "body"
+    headerName: "Body",
+    field: "body"
   }, {
-    headerName: "Actions", width: 220, suppressSizeToFit: true, sortable: false, resizable: false, filter: false, pinned: "right", lockPinned: true, cellRenderer: "actionsCellRenderer"
+    headerName: "Actions",
+    width: 220,
+    suppressSizeToFit: true,
+    suppressMovable: true,
+    sortable: false,
+    resizable: false,
+    filter: false,
+    pinned: "right",
+    cellRenderer: "actionsCellRenderer"
   }];
 
   const gridOptions: GridOptions = {
     defaultColDef: {
       resizable: true,
       sortable: true,
-      filter: true
+      filter: true,
+      lockPinned: true
     },
     columnDefs,
     rowHeight: 35,
@@ -100,11 +120,11 @@ const Posts: React.FC = () => {
 
 
   const options: Array<AnyObject> = columnDefs
-    .filter(column => column.headerName && !column.lockPinned)
+    .filter(column => column.headerName && column.headerName !== "Actions")
     .map(column => ({ value: column.field, label: column.headerName }));
 
   const defaultOptions: Array<AnyObject> = columnDefs
-    .filter(column => column.headerName && !column.hide && !column.lockPinned)
+    .filter(column => column.headerName && !column.hide && column.headerName !== "Actions")
     .map(column => ({ value: column.field, label: column.headerName }));
 
   const [selectedOptions, setSelectedOptions] = useState(defaultOptions);
@@ -144,7 +164,7 @@ const Posts: React.FC = () => {
 
   const handleColumnDragStopped = (event: DragStoppedEvent) => {
     setSelectedOptions(event.columnApi.getAllDisplayedColumns()
-      .filter(column => column.getColDef().headerName && !column.getColDef().lockPinned)
+      .filter(column => column.getColDef().headerName && column.getColDef().headerName !== "Actions")
       .map(column => {
         let colDef = column.getColDef();
         return { value: colDef.field, label: colDef.headerName };
