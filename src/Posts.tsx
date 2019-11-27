@@ -4,8 +4,9 @@ import { AllCommunityModules, GridApi, GridReadyEvent, ColumnApi, ColDef, DragSt
 import Select from 'react-select';
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, ButtonGroup, Nav, Table, Badge, Tooltip, Tab, OverlayTrigger } from 'react-bootstrap';
+import { Button, ButtonGroup, Nav, Table, Tooltip, Tab, OverlayTrigger, Form } from 'react-bootstrap';
 import {Animated} from "react-animated-css";
+import {Formik} from "formik";
 
 import { useSearch, SearchParams, AnyObject } from "./hooks/useSearch";
 
@@ -45,9 +46,9 @@ const Posts: React.FC = () => {
 
   };
 
-  const openNewTab = (row: AnyObject) => {
+  const openNewTab = (row: AnyObject, isEdit: boolean = false) => {
     if (!extraTabs.find(tab => tab.id.toString() === row.id.toString())) {
-      setExtraTabs(prevTabs => [...prevTabs, {...row, show: true}]);
+      setExtraTabs(prevTabs => [...prevTabs, {...row, show: true, isEdit}]);
     }
     setActiveTab(row.id.toString());
   };
@@ -266,7 +267,11 @@ const Posts: React.FC = () => {
             {
             extraTabs.map(tab => (
               <Tab.Pane key={tab.id} eventKey={tab.id.toString()}>
-                <View data={tab} showTab={tab.show} transitionTimeout={transitionTimeout} />
+                {
+                  tab.isEdit
+                    ? <Edit data={tab} showTab={tab.show} transitionTimeout={transitionTimeout} />
+                    : <View data={tab} showTab={tab.show} transitionTimeout={transitionTimeout} />
+                }
               </Tab.Pane>
             ))
             }
@@ -297,7 +302,7 @@ const ActionsCellRenderer = (props: ICellRendererParams) => {
         delay={{ show: 300, hide: 300 }}
         overlay={<Tooltip id="editTooltip">Edit</Tooltip>}
       >
-        <Button variant="primary" onClick={() => console.log(data)}><FontAwesomeIcon fixedWidth icon="edit" /></Button>
+        <Button variant="primary" onClick={() => context.openNewTab(data, true)}><FontAwesomeIcon fixedWidth icon="edit" /></Button>
       </OverlayTrigger>
       <OverlayTrigger
         placement="left"
@@ -322,7 +327,7 @@ const ExtraTab: React.FC<any> = props => {
           eventKey={tabId.toString()}
           style={{ cursor: "pointer" }}
         >
-          {tabId.toString()} <Badge variant="info">View</Badge>&nbsp;
+          {tabId.toString()}&nbsp;
           <FontAwesomeIcon
             icon="times"
             size="sm"
@@ -367,6 +372,39 @@ const View: React.FC<AnyObject> = (props: AnyObject) => {
             </tr>
           </tbody>
         </Table>
+      </div>
+    </Animated>
+    
+  );
+};
+
+const Edit: React.FC<AnyObject> = (props: AnyObject) => {
+  const { data, showTab, transitionTimeout } = props;
+  return (
+    <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
+      <div>
+        <Formik
+          initialValues={{title: data.title, body: data.body}}
+          onSubmit={(values, {setSubmitting}) => {
+            console.log(values);
+            setSubmitting(false);
+          }}
+        >
+          {({isSubmitting}) => (
+            <Form>
+              <Form.Group controlId="title">
+                <Form.Label>Title</Form.Label>
+                <Form.Control type="text" name="title" />
+              </Form.Group>
+              <Form.Group controlId="body">
+                <Form.Label>Body</Form.Label>
+                <Form.Control type="text" name="body" />
+              </Form.Group>
+
+              <Button variant="primary" type="submit">Submit</Button>
+            </Form>
+          )}
+        </Formik>
       </div>
     </Animated>
     
