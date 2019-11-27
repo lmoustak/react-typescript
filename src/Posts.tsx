@@ -18,6 +18,7 @@ import '@ag-grid-community/all-modules/dist/styles/ag-theme-material.css';
 const GridContext: React.Context<AnyObject> = React.createContext<AnyObject>({});
 
 const Posts: React.FC = () => {
+  const transitionTimeout = 500;
   const [extraTabs, setExtraTabs] = useState<Array<AnyObject>>([]);
   const [activeTab, setActiveTab] = useState<string>("Results");
 
@@ -52,31 +53,20 @@ const Posts: React.FC = () => {
     setActiveTab(row.id.toString());
   };
 
-  const hideTab = (tabId: string) => {
-    const tabIndex = extraTabs.findIndex(tab => tab.id.toString() === tabId);
-
-    if (tabIndex > -1) {
-      const tab = extraTabs[tabIndex];
-      tab.show = false;
-
-      if (activeTab === tabId) {
-        let newTabId = tabIndex === 0 ? "Results" : extraTabs[tabIndex - 1].id.toString();
-        setActiveTab(newTabId);
-      }
-
-      setExtraTabs(prevTabs => [...prevTabs.slice(0, tabIndex), tab, ...prevTabs.slice(tabIndex + 1)]);
-    }
-  };
-
   const closeTab = (tabId: string) => {
     let tabIndex = extraTabs.findIndex(tab => tab.id.toString() === tabId);
 
     if (tabIndex > -1) {
+      const tab = extraTabs[tabIndex];
+      tab.show = false;
+      setExtraTabs(prevTabs => [...prevTabs.slice(0, tabIndex), tab, ...prevTabs.slice(tabIndex + 1)]);
+
       if (activeTab === tabId) {
         let newTabId = tabIndex === 0 ? "Results" : extraTabs[tabIndex - 1].id.toString();
         setActiveTab(newTabId);
       }
-      setExtraTabs(prevTabs => [...prevTabs.slice(0, tabIndex), ...prevTabs.slice(tabIndex + 1)]);
+
+      setTimeout(() => setExtraTabs(prevTabs => [...prevTabs.slice(0, tabIndex), ...prevTabs.slice(tabIndex + 1)]), transitionTimeout);
     }
   };
 
@@ -191,8 +181,8 @@ const Posts: React.FC = () => {
               <ExtraTab
                 key={tab.id}
                 tabId={tab.id}
+                transitionTimeout={transitionTimeout}
                 showTab={tab.show}
-                hideTab={hideTab}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 closeTab={closeTab}
@@ -255,7 +245,7 @@ const Posts: React.FC = () => {
           {
             extraTabs.map(tab => (
               <TabPane key={tab.id} tabId={tab.id.toString()}>
-                <View data={tab} showTab={tab.show} />
+                <View data={tab} showTab={tab.show} transitionTimeout={transitionTimeout} />
               </TabPane>
             ))
           }
@@ -280,12 +270,12 @@ const ActionsCellRenderer = (props: ICellRendererParams) => {
 };
 
 const ExtraTab: React.FC<any> = props => {
-  const { tabId, showTab, hideTab, activeTab, setActiveTab, closeTab } = props;
+  const { tabId, showTab, transitionTimeout, activeTab, setActiveTab, closeTab } = props;
 
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={500} animationOutDuration={500} isVisible={showTab}>
+    <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
       <NavItem>
         <NavLink
           className={classnames({ active: activeTab === tabId.toString() })}
@@ -298,8 +288,7 @@ const ExtraTab: React.FC<any> = props => {
             size="sm"
             onClick={event => {
               event.stopPropagation();
-              hideTab(tabId.toString());
-              setTimeout(() => closeTab(tabId.toString()), 500);
+              closeTab(tabId.toString());
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -312,9 +301,9 @@ const ExtraTab: React.FC<any> = props => {
 };
 
 const View: React.FC<AnyObject> = (props: AnyObject) => {
-  const { data, showTab } = props;
+  const { data, showTab, transitionTimeout } = props;
   return (
-    <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={500} animationOutDuration={500} isVisible={showTab}>
+    <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
       <div>
         <Table striped bordered>
           <tbody>
