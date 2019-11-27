@@ -6,6 +6,7 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, ButtonGroup, Nav, NavItem, NavLink, TabContent, TabPane, Table, Badge } from 'reactstrap';
 import classnames from "classnames";
+import {Animated} from "react-animated-css";
 
 import { useSearch, SearchParams, AnyObject } from "./hooks/useSearch";
 
@@ -26,6 +27,7 @@ const Posts: React.FC = () => {
       try {
         await axios.delete(`https://jsonplaceholder.typicode.com/posts/${row.id}`);
         toBeDeleted.push(row);
+        closeTab(row.id.toString());
       } catch (err) {
         console.error(err);
       }
@@ -45,9 +47,25 @@ const Posts: React.FC = () => {
 
   const openNewTab = (row: AnyObject) => {
     if (!extraTabs.find(tab => tab.id.toString() === row.id.toString())) {
-      setExtraTabs(prevTabs => [...prevTabs, row]);
+      setExtraTabs(prevTabs => [...prevTabs, {...row, show: true}]);
     }
     setActiveTab(row.id.toString());
+  };
+
+  const hideTab = (tabId: string) => {
+    const tabIndex = extraTabs.findIndex(tab => tab.id.toString() === tabId);
+
+    if (tabIndex > -1) {
+      const tab = extraTabs[tabIndex];
+      tab.show = false;
+
+      if (activeTab === tabId) {
+        let newTabId = tabIndex === 0 ? "Results" : extraTabs[tabIndex - 1].id.toString();
+        setActiveTab(newTabId);
+      }
+
+      setExtraTabs(prevTabs => [...prevTabs.slice(0, tabIndex), tab, ...prevTabs.slice(tabIndex + 1)]);
+    }
   };
 
   const closeTab = (tabId: string) => {
@@ -60,11 +78,6 @@ const Posts: React.FC = () => {
       }
       setExtraTabs(prevTabs => [...prevTabs.slice(0, tabIndex), ...prevTabs.slice(tabIndex + 1)]);
     }
-  };
-
-  const handleCloseTab = (tabId: string, event: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
-    event.stopPropagation();
-    closeTab(tabId);
   };
 
 
@@ -178,9 +191,11 @@ const Posts: React.FC = () => {
               <ExtraTab
                 key={tab.id}
                 tabId={tab.id}
+                showTab={tab.show}
+                hideTab={hideTab}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
-                handleCloseTab={handleCloseTab}
+                closeTab={closeTab}
               />
             )
           }
@@ -240,7 +255,7 @@ const Posts: React.FC = () => {
           {
             extraTabs.map(tab => (
               <TabPane key={tab.id} tabId={tab.id.toString()}>
-                <View data={tab} />
+                <View data={tab} showTab={tab.show} />
               </TabPane>
             ))
           }
@@ -265,56 +280,65 @@ const ActionsCellRenderer = (props: ICellRendererParams) => {
 };
 
 const ExtraTab: React.FC<any> = props => {
-  const { tabId, activeTab, setActiveTab, handleCloseTab } = props;
+  const { tabId, showTab, hideTab, activeTab, setActiveTab, closeTab } = props;
 
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <NavItem className="animated fadeIn">
-      <NavLink
-        className={classnames({ active: activeTab === tabId.toString() })}
-        onClick={() => setActiveTab(tabId.toString())}
-        style={{ cursor: "pointer" }}
-      >
-        {tabId.toString()} <Badge color="info">View</Badge>&nbsp;
-        <FontAwesomeIcon
-          icon="times"
-          size="sm"
-          onClick={event => handleCloseTab(tabId.toString(), event)}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          style={isHovered ? { color: "red" } : { color: "initial" }}
-        />
-      </NavLink>
-    </NavItem>
+    <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={500} animationOutDuration={500} isVisible={showTab}>
+      <NavItem>
+        <NavLink
+          className={classnames({ active: activeTab === tabId.toString() })}
+          onClick={() => setActiveTab(tabId.toString())}
+          style={{ cursor: "pointer" }}
+        >
+          {tabId.toString()} <Badge color="info">View</Badge>&nbsp;
+          <FontAwesomeIcon
+            icon="times"
+            size="sm"
+            onClick={event => {
+              event.stopPropagation();
+              hideTab(tabId.toString());
+              setTimeout(() => closeTab(tabId.toString()), 500);
+            }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            style={isHovered ? { color: "red" } : { color: "initial" }}
+          />
+        </NavLink>
+      </NavItem>
+    </Animated>
   );
 };
 
 const View: React.FC<AnyObject> = (props: AnyObject) => {
-  const { data } = props;
+  const { data, showTab } = props;
   return (
-    <div>
-      <Table striped>
-        <tbody>
-          <tr>
-            <th>User Id</th>
-            <td>{data.userId}</td>
-          </tr>
-          <tr>
-            <th>Username</th>
-            <td>{data.username}</td>
-          </tr>
-          <tr>
-            <th>Title</th>
-            <td>{data.title}</td>
-          </tr>
-          <tr>
-            <th>Body</th>
-            <td>{data.body}</td>
-          </tr>
-        </tbody>
-      </Table>
-    </div>
+    <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={500} animationOutDuration={500} isVisible={showTab}>
+      <div>
+        <Table striped bordered>
+          <tbody>
+            <tr>
+              <th>User Id</th>
+              <td>{data.userId}</td>
+            </tr>
+            <tr>
+              <th>Username</th>
+              <td>{data.username}</td>
+            </tr>
+            <tr>
+              <th>Title</th>
+              <td>{data.title}</td>
+            </tr>
+            <tr>
+              <th>Body</th>
+              <td>{data.body}</td>
+            </tr>
+          </tbody>
+        </Table>
+      </div>
+    </Animated>
+    
   );
 };
 
