@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Col, Button, FormGroup, Label, Input } from 'reactstrap';
+import { Row, Col, Button, Form } from 'react-bootstrap';
 
 const Counter: React.FC = () => {
   const [counter, setCounter] = useState(0);
@@ -14,12 +14,12 @@ const Counter: React.FC = () => {
 
   return (
     <Row className="mt-5">
-      <Col xs={12} md={{size: 4, offset: 4}}>
+      <Col xs md={{span: 4, offset: 4}}>
         <p>Current counter value: {counter}</p>
         <Button color="primary" size="sm" onClick={handleResetClick}>Reset</Button>
-        <FormGroup className="mt-5">
-          <Label>Step value: <Input type="number" name="step" className="form-control" min="1" value={step} onChange={handleStepChange}/></Label>
-        </FormGroup>
+        <Form.Group className="mt-5">
+          <Form.Label>Step value: <Form.Control type="number" name="step" className="form-control" min="1" value={step.toString()} onChange={handleStepChange}/></Form.Label>
+        </Form.Group>
         {
           !isNaN(step) &&
           (

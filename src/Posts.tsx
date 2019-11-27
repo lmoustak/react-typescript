@@ -4,8 +4,7 @@ import { AllCommunityModules, GridApi, GridReadyEvent, ColumnApi, ColDef, DragSt
 import Select from 'react-select';
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, ButtonGroup, Nav, NavItem, NavLink, TabContent, TabPane, Table, Badge } from 'reactstrap';
-import classnames from "classnames";
+import { Button, ButtonGroup, Nav, Table, Badge, Tooltip, Tab, OverlayTrigger } from 'react-bootstrap';
 import {Animated} from "react-animated-css";
 
 import { useSearch, SearchParams, AnyObject } from "./hooks/useSearch";
@@ -62,7 +61,7 @@ const Posts: React.FC = () => {
       setExtraTabs(prevTabs => [...prevTabs.slice(0, tabIndex), tab, ...prevTabs.slice(tabIndex + 1)]);
 
       if (activeTab === tabId) {
-        let newTabId = tabIndex === 0 ? "Results" : extraTabs[tabIndex - 1].id.toString();
+        let newTabId: string = tabIndex === 0 ? "Results" : extraTabs[tabIndex - 1].id.toString();
         setActiveTab(newTabId);
       }
 
@@ -92,7 +91,7 @@ const Posts: React.FC = () => {
     field: "body"
   }, {
     headerName: "Actions",
-    width: 220,
+    width: 120,
     suppressSizeToFit: true,
     suppressMovable: true,
     sortable: false,
@@ -186,90 +185,94 @@ const Posts: React.FC = () => {
   return (
     <GridContext.Provider value={{ openNewTab, deleteRows }}>
       <div className="mt-5">
-        <Nav tabs>
-          <NavItem>
-            <NavLink
-              className={classnames({ active: activeTab === "Results" })}
-              onClick={() => setActiveTab("Results")}
-              style={{ cursor: "pointer" }}
-            >
-              <FontAwesomeIcon icon="search" /> Results
-            </NavLink>
-          </NavItem>
-          {
-            extraTabs.map(tab =>
-              <ExtraTab
-                key={tab.id}
-                tabId={tab.id}
-                transitionTimeout={transitionTimeout}
-                showTab={tab.show}
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                closeTab={closeTab}
-              />
-            )
-          }
-        </Nav>
-
-        <TabContent activeTab={activeTab}>
-          <TabPane tabId="Results">
-            <div className="my-3">
-              <form>
-                <div className="form-group">
-                  <label html-for="visibleColumnSelect">Visible columns:</label>
-                  <Select
-                    id="visibleColumnSelect"
-                    options={options}
-                    isMulti
-                    closeMenuOnSelect={false}
-                    blurInputOnSelect={false}
-                    onChange={handleOnSelectChange}
-                    value={selectedOptions}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <button
-                    type="button"
-                    className="btn btn-danger"
-                    onClick={() => deleteSelected()}
-                  >
-                    Delete selected
-                </button>
-                </div>
-              </form>
-
-              <div
-                className="ag-theme-balham"
-                style={{
-                  height: '500px',
-                  width: '100%'
-                }}
+        <Tab.Container
+          unmountOnExit
+          activeKey={activeTab}
+          onSelect={(key: string) => setActiveTab(key)}
+        >
+          <Nav variant="tabs" as="ul">
+            <Nav.Item as="li">
+              <Nav.Link
+                eventKey="Results"
+                style={{ cursor: "pointer" }}
               >
-                <AgGridReact
-                  gridOptions={gridOptions}
-                  rowData={data}
-                  modules={AllCommunityModules}
-                  animateRows
-                  pagination
-                  paginationAutoPageSize
-                  rowSelection="multiple"
-                  onGridReady={onGridReady}
-                  onDragStopped={handleColumnDragStopped}
-                >
-                </AgGridReact>
-              </div>
+                <FontAwesomeIcon icon="search" /> Results
+              </Nav.Link>
+            </Nav.Item>
+            {
+              extraTabs.map(tab =>
+                <ExtraTab
+                  key={tab.id}
+                  tabId={tab.id}
+                  transitionTimeout={transitionTimeout}
+                  showTab={tab.show}
+                  closeTab={closeTab}
+                />
+              )
+            }
+          </Nav>
+          <Tab.Content>
+            <Tab.Pane eventKey="Results" title="Results">
+              <div className="my-3">
+                <form>
+                  <div className="form-group">
+                    <label html-for="visibleColumnSelect">Visible columns:</label>
+                    <Select
+                      id="visibleColumnSelect"
+                      options={options}
+                      isMulti
+                      closeMenuOnSelect={false}
+                      blurInputOnSelect={false}
+                      onChange={handleOnSelectChange}
+                      value={selectedOptions}
+                    />
+                  </div>
 
-            </div>
-          </TabPane>
-          {
+                  <div className="form-group">
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={() => deleteSelected()}
+                    >
+                      Delete selected
+                  </button>
+                  </div>
+                </form>
+
+                <div
+                  className="ag-theme-balham"
+                  style={{
+                    height: '500px',
+                    width: '100%'
+                  }}
+                >
+                  <AgGridReact
+                    gridOptions={gridOptions}
+                    rowData={data}
+                    modules={AllCommunityModules}
+                    animateRows
+                    pagination
+                    paginationAutoPageSize
+                    rowSelection="multiple"
+                    onGridReady={onGridReady}
+                    onDragStopped={handleColumnDragStopped}
+                  >
+                  </AgGridReact>
+                </div>
+
+              </div>
+            </Tab.Pane>
+
+            {
             extraTabs.map(tab => (
-              <TabPane key={tab.id} tabId={tab.id.toString()}>
+              <Tab.Pane key={tab.id} eventKey={tab.id.toString()}>
                 <View data={tab} showTab={tab.show} transitionTimeout={transitionTimeout} />
-              </TabPane>
+              </Tab.Pane>
             ))
-          }
-        </TabContent>
+            }
+          </Tab.Content>
+
+        </Tab.Container>
       </div>
 
     </GridContext.Provider>
@@ -282,40 +285,59 @@ const ActionsCellRenderer = (props: ICellRendererParams) => {
   const { data } = props;
   return (
     <ButtonGroup size="sm">
-      <Button width="50px" color="primary" onClick={() => context.openNewTab(data)}><FontAwesomeIcon icon="eye" /> View</Button>
-      <Button width="50px" color="primary" onClick={() => console.log(data)}><FontAwesomeIcon icon="edit" /> Edit</Button>
-      <Button width="50px" color="danger" onClick={() => context.deleteRows([data])}><FontAwesomeIcon icon="trash" /> Delete</Button>
+      <OverlayTrigger
+        placement="left"
+        delay={{ show: 300, hide: 300 }}
+        overlay={<Tooltip id="viewTooltip">View</Tooltip>}
+      >
+        <Button variant="primary" onClick={() => context.openNewTab(data)}><FontAwesomeIcon fixedWidth icon="eye" /></Button>
+      </OverlayTrigger>
+      <OverlayTrigger
+        placement="left"
+        delay={{ show: 300, hide: 300 }}
+        overlay={<Tooltip id="editTooltip">Edit</Tooltip>}
+      >
+        <Button variant="primary" onClick={() => console.log(data)}><FontAwesomeIcon fixedWidth icon="edit" /></Button>
+      </OverlayTrigger>
+      <OverlayTrigger
+        placement="left"
+        delay={{ show: 300, hide: 300 }}
+        overlay={<Tooltip id="deleteTooltip">Delete</Tooltip>}
+      >
+        <Button variant="danger" onClick={() => context.deleteRows([data])}><FontAwesomeIcon fixedWidth icon="trash" /></Button>
+      </OverlayTrigger>
     </ButtonGroup>
   );
 };
 
 const ExtraTab: React.FC<any> = props => {
-  const { tabId, showTab, transitionTimeout, activeTab, setActiveTab, closeTab } = props;
+  const { tabId, showTab, transitionTimeout, closeTab } = props;
 
   const [isHovered, setIsHovered] = useState(false);
 
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
-      <NavItem>
-        <NavLink
-          className={classnames({ active: activeTab === tabId.toString() })}
-          onClick={() => setActiveTab(tabId.toString())}
+      <Nav.Item as="li">
+        <Nav.Link
+          eventKey={tabId.toString()}
           style={{ cursor: "pointer" }}
         >
-          {tabId.toString()} <Badge color="info">View</Badge>&nbsp;
+          {tabId.toString()} <Badge variant="info">View</Badge>&nbsp;
           <FontAwesomeIcon
             icon="times"
             size="sm"
             onClick={event => {
               event.stopPropagation();
+              event.preventDefault();
               closeTab(tabId.toString());
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             style={isHovered ? { color: "red" } : { color: "initial" }}
           />
-        </NavLink>
-      </NavItem>
+          
+        </Nav.Link>
+      </Nav.Item>
     </Animated>
   );
 };

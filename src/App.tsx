@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import ReactMarkdown from 'react-markdown';
-import { Row, Col, Navbar, NavbarBrand, Nav, NavItem, Container } from "reactstrap";
+import { Row, Col, Navbar, Nav, Container } from "react-bootstrap";
 
 import './App.css';
 import './styles.css'
@@ -35,7 +35,7 @@ const AnimatedPages: React.FC = () => {
 
   const startScreen = (
     <Row className="mt-5">
-      <Col xs={12}>
+      <Col xs>
         <ReactMarkdown source={markdown} />
       </Col>
     </Row>
@@ -43,21 +43,21 @@ const AnimatedPages: React.FC = () => {
 
   return (
     <div>
-      <Navbar color="light" light expand="sm">
-        <NavbarBrand>React playground</NavbarBrand>
-        <Nav navbar className="mr-auto">
-          <NavItem>
+      <Navbar bg="light" expand="sm">
+        <Navbar.Brand>React playground</Navbar.Brand>
+        <Nav className="mr-auto">
+          <Nav.Item>
             <NavLink className="nav-link" to="/" exact>Home</NavLink>
-          </NavItem>
-          <NavItem>
+          </Nav.Item>
+          <Nav.Item>
             <NavLink className="nav-link" to="/counter">Counter</NavLink>
-          </NavItem>
-          <NavItem>
+          </Nav.Item>
+          <Nav.Item>
             <NavLink className="nav-link" to="/users">Users</NavLink>
-          </NavItem>
-          <NavItem>
+          </Nav.Item>
+          <Nav.Item>
             <NavLink className="nav-link" to="/posts">Posts</NavLink>
-          </NavItem>
+          </Nav.Item>
         </Nav>
       </Navbar>
 

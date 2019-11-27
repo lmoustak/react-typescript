@@ -3,7 +3,7 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import User from './interfaces/User';
-import { Table, InputGroup, Input, InputGroupAddon, Button } from 'reactstrap';
+import { Table, InputGroup, FormControl, Button } from 'react-bootstrap';
 
 interface UserProps {
   users: Array<User>
@@ -98,26 +98,26 @@ const FetchUsers: React.FC = () => {
                 <th scope="col">Id</th>
                 <th scope="col">
                   <InputGroup>
-                    <Input type="text" name="nameFilter" value={nameFilter} placeholder="Name" onChange={handleUsersNameFilterChange} />
-                    <InputGroupAddon addonType="append">
-                      <Button color="secondary" outline onClick={handleUsersNameFilterClearClick}><FontAwesomeIcon icon="times" /></Button>
-                    </InputGroupAddon>
+                    <FormControl type="text" name="nameFilter" value={nameFilter} placeholder="Name" onChange={handleUsersNameFilterChange} />
+                    <InputGroup.Append>
+                      <Button variant="outline-secondary" onClick={handleUsersNameFilterClearClick}><FontAwesomeIcon icon="times" /></Button>
+                    </InputGroup.Append>
                   </InputGroup>
                 </th>
                 <th scope="col">
                   <InputGroup>
-                    <Input type="text" name="usernameFilter" value={usernameFilter} placeholder="Username" onChange={handleUsersUsernameFilterChange} />
-                    <InputGroupAddon addonType="append">
-                      <Button color="secondary" outline onClick={handleUsersUsernameFilterClearClick}><FontAwesomeIcon icon="times" /></Button>
-                    </InputGroupAddon>
+                    <FormControl type="text" name="usernameFilter" value={usernameFilter} placeholder="Username" onChange={handleUsersUsernameFilterChange} />
+                    <InputGroup.Append>
+                      <Button variant="outline-secondary" onClick={handleUsersUsernameFilterClearClick}><FontAwesomeIcon icon="times" /></Button>
+                    </InputGroup.Append>
                   </InputGroup>
                 </th>
                 <th scope="col">
                   <InputGroup>
-                    <Input type="text" name="emailFilter" value={emailFilter} placeholder="Email" onChange={handleUsersEmailFilterChange} />
-                    <InputGroupAddon addonType="append">
-                      <Button color="secondary" outline onClick={handleUsersEmailFilterClearClick}><FontAwesomeIcon icon="times" /></Button>
-                    </InputGroupAddon>
+                    <FormControl type="text" name="emailFilter" value={emailFilter} placeholder="Email" onChange={handleUsersEmailFilterChange} />
+                    <InputGroup.Append>
+                      <Button variant="outline-secondary" onClick={handleUsersEmailFilterClearClick}><FontAwesomeIcon icon="times" /></Button>
+                    </InputGroup.Append>
                   </InputGroup>
                 </th>
               </tr>
