@@ -213,7 +213,7 @@ const Posts: React.FC = () => {
             }
           </Nav>
           <Tab.Content>
-            <Tab.Pane eventKey="Results" title="Results">
+            <Tab.Pane eventKey="Results">
               <div className="my-3">
                 <form>
                   <div className="form-group">
