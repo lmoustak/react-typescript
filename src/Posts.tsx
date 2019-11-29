@@ -5,8 +5,8 @@ import Select from 'react-select';
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, ButtonGroup, Nav, Table, Tooltip, Tab, OverlayTrigger, Form } from 'react-bootstrap';
-import {Animated} from "react-animated-css";
-import {Formik} from "formik";
+import { Animated } from "react-animated-css";
+import { useFormik } from "formik";
 
 import { useSearch, SearchParams, AnyObject } from "./hooks/useSearch";
 
@@ -269,7 +269,7 @@ const Posts: React.FC = () => {
               <Tab.Pane key={tab.id} eventKey={tab.id.toString()}>
                 {
                   tab.isEdit
-                    ? <Edit data={tab} showTab={tab.show} transitionTimeout={transitionTimeout} />
+                    ? <Edit data={tab} showTab={tab.show} transitionTimeout={transitionTimeout} closeTab={closeTab} />
                     : <View data={tab} showTab={tab.show} transitionTimeout={transitionTimeout} />
                 }
               </Tab.Pane>
@@ -379,32 +379,35 @@ const View: React.FC<AnyObject> = (props: AnyObject) => {
 };
 
 const Edit: React.FC<AnyObject> = (props: AnyObject) => {
-  const { data, showTab, transitionTimeout } = props;
+  const { data, showTab, transitionTimeout, closeTab } = props;
+  
+  const formik = useFormik({
+    initialValues: {title: data.title, body: data.body},
+    onSubmit: async values => {
+      const res = await axios.put(`https://jsonplaceholder.typicode.com/posts/${props.data.id}`, {
+        ...values
+      });
+
+      console.log(res);
+      closeTab(props.data.id.toString());
+    }
+  });
+
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
       <div>
-        <Formik
-          initialValues={{title: data.title, body: data.body}}
-          onSubmit={(values, {setSubmitting}) => {
-            console.log(values);
-            setSubmitting(false);
-          }}
-        >
-          {({isSubmitting}) => (
-            <Form>
-              <Form.Group controlId="title">
-                <Form.Label>Title</Form.Label>
-                <Form.Control type="text" name="title" />
-              </Form.Group>
-              <Form.Group controlId="body">
-                <Form.Label>Body</Form.Label>
-                <Form.Control type="text" name="body" />
-              </Form.Group>
+        <Form onSubmit={formik.handleSubmit}>
+          <Form.Group controlId="title">
+            <Form.Label>Title</Form.Label>
+            <Form.Control type="text" name="title" value={formik.values.title} onChange={formik.handleChange} />
+          </Form.Group>
+          <Form.Group controlId="body">
+            <Form.Label>Body</Form.Label>
+            <Form.Control type="text" name="body" value={formik.values.body} onChange={formik.handleChange} />
+          </Form.Group>
 
-              <Button variant="primary" type="submit">Submit</Button>
-            </Form>
-          )}
-        </Formik>
+          <Button variant="primary" type="submit">Submit</Button>
+        </Form>
       </div>
     </Animated>
     
