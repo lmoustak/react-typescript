@@ -4,7 +4,7 @@ import { AllCommunityModules, GridApi, GridReadyEvent, ColumnApi, ColDef, DragSt
 import Select from 'react-select';
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, ButtonGroup, Nav, Table, Tooltip, Tab, OverlayTrigger, Form } from 'react-bootstrap';
+import { Button, ButtonGroup, Nav, Table, Tooltip, Tab, OverlayTrigger, Form, Row, Col } from 'react-bootstrap';
 import { Animated } from "react-animated-css";
 import { useFormik } from "formik";
 
@@ -351,28 +351,30 @@ const View: React.FC<AnyObject> = (props: AnyObject) => {
   const { data, showTab, transitionTimeout } = props;
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
-      <div>
-        <Table striped bordered>
-          <tbody>
-            <tr>
-              <th>User Id</th>
-              <td>{data.userId}</td>
-            </tr>
-            <tr>
-              <th>Username</th>
-              <td>{data.username}</td>
-            </tr>
-            <tr>
-              <th>Title</th>
-              <td>{data.title}</td>
-            </tr>
-            <tr>
-              <th>Body</th>
-              <td>{data.body}</td>
-            </tr>
-          </tbody>
-        </Table>
-      </div>
+      <Row>
+        <Col xs sm={6} md={4}>
+          <Table striped bordered>
+            <tbody>
+              <tr>
+                <th>User Id</th>
+                <td>{data.userId}</td>
+              </tr>
+              <tr>
+                <th>Username</th>
+                <td>{data.username}</td>
+              </tr>
+              <tr>
+                <th>Title</th>
+                <td>{data.title}</td>
+              </tr>
+              <tr>
+                <th>Body</th>
+                <td>{data.body}</td>
+              </tr>
+            </tbody>
+          </Table>
+        </Col>
+      </Row>
     </Animated>
     
   );
@@ -395,20 +397,22 @@ const Edit: React.FC<AnyObject> = (props: AnyObject) => {
 
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
-      <div>
-        <Form onSubmit={formik.handleSubmit}>
-          <Form.Group controlId="title">
-            <Form.Label>Title</Form.Label>
-            <Form.Control type="text" name="title" value={formik.values.title} onChange={formik.handleChange} />
-          </Form.Group>
-          <Form.Group controlId="body">
-            <Form.Label>Body</Form.Label>
-            <Form.Control type="text" name="body" value={formik.values.body} onChange={formik.handleChange} />
-          </Form.Group>
+      <Row>
+        <Col xs sm={6} md={4}>
+          <Form className="text-left" onSubmit={formik.handleSubmit}>
+            <Form.Group controlId="title">
+              <Form.Label>Title</Form.Label>
+              <Form.Control type="text" name="title" value={formik.values.title} onChange={formik.handleChange} />
+            </Form.Group>
+            <Form.Group controlId="body">
+              <Form.Label>Body</Form.Label>
+              <Form.Control type="text" name="body" value={formik.values.body} onChange={formik.handleChange} />
+            </Form.Group>
 
-          <Button variant="primary" type="submit">Submit</Button>
-        </Form>
-      </div>
+            <Button variant="primary" type="submit">Submit</Button>
+          </Form>
+        </Col>
+      </Row>
     </Animated>
     
   );
