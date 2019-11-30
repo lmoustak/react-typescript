@@ -4,7 +4,7 @@ import { AllCommunityModules, GridApi, GridReadyEvent, ColumnApi, ColDef, DragSt
 import Select from 'react-select';
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, ButtonGroup, Nav, Table, Tooltip, Tab, OverlayTrigger, Form, Row, Col } from 'react-bootstrap';
+import { Button, ButtonGroup, Nav, Table, Tooltip, Tab, OverlayTrigger, Form, Row, Col, Badge, ButtonToolbar } from 'react-bootstrap';
 import { Animated } from "react-animated-css";
 import { useFormik } from "formik";
 
@@ -22,6 +22,73 @@ const Posts: React.FC = () => {
   const [extraTabs, setExtraTabs] = useState<Array<AnyObject>>([]);
   const [activeTab, setActiveTab] = useState<string>("Results");
 
+  // eslint-disable-next-line
+  const [query, setQuery] = useState<string | SearchParams>({
+    url: "https://jsonplaceholder.typicode.com/posts",
+    joins: {
+      select: "name",
+      as: "username",
+      from: "https://jsonplaceholder.typicode.com/users",
+      join: "id",
+      on: "userId"
+    }
+  });
+  const [data, loading] = useSearch(query);
+
+  const createRows = async (rows: Array<any>) => {
+    let toBeCreated: Array<any> = [];
+    await Promise.all(rows.map(async row => {
+      try {
+        await axios.post(`https://jsonplaceholder.typicode.com/posts`, {
+          ...row, userId: 1
+        });
+        toBeCreated.push(row);
+        closeTab("Create");
+      } catch (err) {
+        console.error(err);
+      }
+    }));
+
+    if (gridApi.current) {
+      let newData = [...data];
+      const transactions = gridApi.current.updateRowData({ add: toBeCreated });
+
+      transactions.add.forEach(transaction => {
+        newData = [...newData, transaction.data];
+      });
+      gridApi.current.setRowData(newData);
+    }
+
+  };
+
+  const editRows = async (rows: Array<any>) => {
+    let toBeUpdated: Array<any> = [];
+    await Promise.all(rows.map(async row => {
+      try {
+        await axios.put(`https://jsonplaceholder.typicode.com/posts/${row.id}`, {
+          ...row
+        });
+        toBeUpdated.push(row);
+        closeTab(row.id.toString());
+      } catch (err) {
+        console.error(err);
+      }
+    }));
+
+
+    if (gridApi.current) {
+      let newData = [...data];
+      const transactions = gridApi.current.updateRowData({ update: toBeUpdated });
+
+      transactions.update.forEach(transaction => {
+        const index = newData.findIndex(data => data.id === transaction.data.id);
+        newData[index] = transaction.data;
+      });
+      gridApi.current.setRowData(newData);
+    }
+
+  };
+
   const deleteRows = async (rows: Array<any>) => {
     let toBeDeleted: Array<any> = [];
     await Promise.all(rows.map(async row => {
@@ -34,9 +101,16 @@ const Posts: React.FC = () => {
       }
     }));
 
-    if (gridApi.current) {
-      gridApi.current.updateRowData({ remove: toBeDeleted });
+    if (gridApi && gridApi.current) {
+      let newData = [...data];
+      const transactions = gridApi.current.updateRowData({ remove: toBeDeleted });
+
+      transactions.remove.forEach(transaction => {
+        const index = newData.findIndex(data => data.id === transaction.data.id);
+        newData = [...newData.slice(0, index), ...newData.slice(index + 1)];
+      });
     }
+
   };
 
   const deleteSelected = () => {
@@ -46,18 +120,30 @@ const Posts: React.FC = () => {
 
   };
 
-  const openNewTab = (row: AnyObject, isEdit: boolean = false) => {
-    if (!extraTabs.find(tab => tab.id.toString() === row.id.toString())) {
-      setExtraTabs(prevTabs => [...prevTabs, {...row, show: true, isEdit}]);
+  const openNewTab = (row: AnyObject | null, tabMode: string = "view") => {
+    if (row != null) {
+      if (!extraTabs.find(tab => tab.id.toString() === row.id.toString())) {
+        setExtraTabs(prevTabs => [...prevTabs, { data: { ...row }, show: true, tabMode }]);
+      }
+      setActiveTab(row.id.toString());
+    } else if (tabMode.toLowerCase() === "create") {
+      if (!extraTabs.find(tab => tab.id.toString() === "Create")) {
+        setExtraTabs(prevTabs => [...prevTabs, { data: { id: "Create" }, show: true, tabMode }]);
+      }
+      setActiveTab("Create");
     }
-    setActiveTab(row.id.toString());
+
   };
 
-  const closeTab = (tabId: string) => {
-    let tabIndex = extraTabs.findIndex(tab => tab.id.toString() === tabId);
+  const closeTab = (tabId: string | number) => {
+    if (typeof tabId === "number") {
+      tabId = tabId.toString();
+    }
+
+    let tabIndex = extraTabs.findIndex(tab => tab.data.id.toString() === tabId);
 
     if (tabIndex > -1) {
-      const tab = extraTabs[tabIndex];
+      const tab = { ...extraTabs[tabIndex] };
       tab.show = false;
       setExtraTabs(prevTabs => [...prevTabs.slice(0, tabIndex), tab, ...prevTabs.slice(tabIndex + 1)]);
 
@@ -114,7 +200,8 @@ const Posts: React.FC = () => {
     suppressRowClickSelection: true,
     frameworkComponents: {
       actionsCellRenderer: ActionsCellRenderer
-    }
+    },
+    getRowNodeId: data => data.id
   };
 
 
@@ -129,18 +216,6 @@ const Posts: React.FC = () => {
 
   const [selectedOptions, setSelectedOptions] = useState(defaultOptions);
 
-  // eslint-disable-next-line
-  const [query, setQuery] = useState<string | SearchParams>({
-    url: "https://jsonplaceholder.typicode.com/posts",
-    joins: {
-      select: "name",
-      as: "username",
-      from: "https://jsonplaceholder.typicode.com/users",
-      join: "id",
-      on: "userId"
-    }
-  });
-  const [data, loading] = useSearch(query);
 
   const gridApi = useRef<GridApi>();
   const columnApi = useRef<ColumnApi>();
@@ -187,7 +262,6 @@ const Posts: React.FC = () => {
     <GridContext.Provider value={{ openNewTab, deleteRows }}>
       <div className="mt-5">
         <Tab.Container
-          unmountOnExit
           activeKey={activeTab}
           onSelect={(key: string) => setActiveTab(key)}
         >
@@ -203,11 +277,12 @@ const Posts: React.FC = () => {
             {
               extraTabs.map(tab =>
                 <ExtraTab
-                  key={tab.id}
-                  tabId={tab.id}
+                  key={tab.data.id}
+                  tabId={tab.data.id}
                   transitionTimeout={transitionTimeout}
                   showTab={tab.show}
                   closeTab={closeTab}
+                  tabMode={tab.tabMode}
                 />
               )
             }
@@ -230,13 +305,21 @@ const Posts: React.FC = () => {
                   </div>
 
                   <div className="form-group">
-                    <button
-                      type="button"
-                      className="btn btn-danger"
-                      onClick={() => deleteSelected()}
-                    >
-                      Delete selected
-                  </button>
+                    <ButtonToolbar>
+                      <Button
+                        variant="success"
+                        onClick={() => openNewTab(null, "create")}
+                      >
+                        <FontAwesomeIcon icon="plus" /> Create New Post
+                      </Button>
+                      <Button
+                        variant="danger"
+                        onClick={() => deleteSelected()}
+                      >
+                        <FontAwesomeIcon icon="trash" /> Delete selected
+                    </Button>
+
+                    </ButtonToolbar>
                   </div>
                 </form>
 
@@ -265,15 +348,48 @@ const Posts: React.FC = () => {
             </Tab.Pane>
 
             {
-            extraTabs.map(tab => (
-              <Tab.Pane key={tab.id} eventKey={tab.id.toString()}>
-                {
-                  tab.isEdit
-                    ? <Edit data={tab} showTab={tab.show} transitionTimeout={transitionTimeout} closeTab={closeTab} />
-                    : <View data={tab} showTab={tab.show} transitionTimeout={transitionTimeout} />
+              extraTabs.map(tab => {
+                let tabComponent;
+
+                switch (tab.tabMode.toLowerCase()) {
+                  case "create":
+                    tabComponent = (
+                      <Create
+                        showTab={tab.show}
+                        transitionTimeout={transitionTimeout}
+                        createEntity={createRows}
+                      />
+                    );
+                    break;
+                  case "update":
+                    tabComponent = (
+                      <Edit
+                        data={tab.data}
+                        showTab={tab.show}
+                        transitionTimeout={transitionTimeout}
+                        editEntity={editRows}
+                      />
+                    );
+                    break;
+                  case "view":
+                    tabComponent = (
+                      <View
+                        data={tab.data}
+                        showTab={tab.show}
+                        transitionTimeout={transitionTimeout}
+                        deleteEntity={deleteRows}
+                      />
+                    );
+                    break;
+                  default:
+                    break;
                 }
-              </Tab.Pane>
-            ))
+                return (
+                  <Tab.Pane key={tab.data.id} eventKey={tab.data.id.toString()}>
+                    {tabComponent}
+                  </Tab.Pane>
+                )
+              })
             }
           </Tab.Content>
 
@@ -302,7 +418,7 @@ const ActionsCellRenderer = (props: ICellRendererParams) => {
         delay={{ show: 300, hide: 300 }}
         overlay={<Tooltip id="editTooltip">Edit</Tooltip>}
       >
-        <Button variant="primary" onClick={() => context.openNewTab(data, true)}><FontAwesomeIcon fixedWidth icon="edit" /></Button>
+        <Button variant="primary" onClick={() => context.openNewTab(data, "update")}><FontAwesomeIcon fixedWidth icon="edit" /></Button>
       </OverlayTrigger>
       <OverlayTrigger
         placement="left"
@@ -316,9 +432,18 @@ const ActionsCellRenderer = (props: ICellRendererParams) => {
 };
 
 const ExtraTab: React.FC<any> = props => {
-  const { tabId, showTab, transitionTimeout, closeTab } = props;
+  const { tabId, showTab, transitionTimeout, tabMode, closeTab } = props;
 
   const [isHovered, setIsHovered] = useState(false);
+
+  const badge = (tabMode: string) => {
+    switch (tabMode.toLowerCase()) {
+      case "view":
+        return <Badge variant="info">View</Badge>;
+      case "update":
+        return <Badge variant="warning">Update</Badge>;
+    }
+  };
 
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
@@ -327,7 +452,10 @@ const ExtraTab: React.FC<any> = props => {
           eventKey={tabId.toString()}
           style={{ cursor: "pointer" }}
         >
-          {tabId.toString()}&nbsp;
+          {tabId.toString()}
+          &nbsp;
+          {badge(tabMode)}
+          &nbsp;
           <FontAwesomeIcon
             icon="times"
             size="sm"
@@ -340,7 +468,7 @@ const ExtraTab: React.FC<any> = props => {
             onMouseLeave={() => setIsHovered(false)}
             style={isHovered ? { color: "red" } : { color: "initial" }}
           />
-          
+
         </Nav.Link>
       </Nav.Item>
     </Animated>
@@ -348,7 +476,7 @@ const ExtraTab: React.FC<any> = props => {
 };
 
 const View: React.FC<AnyObject> = (props: AnyObject) => {
-  const { data, showTab, transitionTimeout } = props;
+  const { data, showTab, transitionTimeout, deleteEntity } = props;
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
       <Row>
@@ -373,26 +501,21 @@ const View: React.FC<AnyObject> = (props: AnyObject) => {
               </tr>
             </tbody>
           </Table>
+
+          <Button variant="danger" onClick={() => deleteEntity([data])}><FontAwesomeIcon fixedWidth icon="trash" /> Delete</Button>
         </Col>
       </Row>
     </Animated>
-    
+
   );
 };
 
 const Edit: React.FC<AnyObject> = (props: AnyObject) => {
-  const { data, showTab, transitionTimeout, closeTab } = props;
-  
-  const formik = useFormik({
-    initialValues: {title: data.title, body: data.body},
-    onSubmit: async values => {
-      const res = await axios.put(`https://jsonplaceholder.typicode.com/posts/${props.data.id}`, {
-        ...values
-      });
+  const { data, showTab, transitionTimeout, editEntity } = props;
 
-      console.log(res);
-      closeTab(props.data.id.toString());
-    }
+  const formik = useFormik({
+    initialValues: { title: data.title, body: data.body },
+    onSubmit: async values => editEntity([{ ...data, ...values }])
   });
 
   return (
@@ -414,7 +537,38 @@ const Edit: React.FC<AnyObject> = (props: AnyObject) => {
         </Col>
       </Row>
     </Animated>
-    
+
+  );
+};
+
+const Create: React.FC<AnyObject> = (props: AnyObject) => {
+  const { showTab, transitionTimeout, createEntity } = props;
+
+  const formik = useFormik({
+    initialValues: { title: "", body: "" },
+    onSubmit: async values => createEntity([{ ...values }])
+  });
+
+  return (
+    <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
+      <Row>
+        <Col xs sm={6} md={4}>
+          <Form className="text-left" onSubmit={formik.handleSubmit}>
+            <Form.Group controlId="title">
+              <Form.Label>Title</Form.Label>
+              <Form.Control type="text" name="title" value={formik.values.title} onChange={formik.handleChange} />
+            </Form.Group>
+            <Form.Group controlId="body">
+              <Form.Label>Body</Form.Label>
+              <Form.Control type="text" name="body" value={formik.values.body} onChange={formik.handleChange} />
+            </Form.Group>
+
+            <Button variant="primary" type="submit">Submit</Button>
+          </Form>
+        </Col>
+      </Row>
+    </Animated>
+
   );
 };
 
