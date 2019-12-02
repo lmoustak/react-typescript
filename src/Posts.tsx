@@ -44,15 +44,14 @@ const Posts: React.FC = () => {
         const { data: responseData } = await axios.post(`https://jsonplaceholder.typicode.com/posts`, {
           ...row, userId: JSON.parse(row.user).id
         });
-        toBeCreated.push(responseData);
+        toBeCreated.push({...row, ...responseData});
         closeTab("Create");
       } catch (err) {
         console.error(err);
       }
     }));
 
-    let newData = [...data, ...toBeCreated];
-    setData(newData);
+    setData(prevData => [...prevData, ...toBeCreated]);
 
   };
 
@@ -60,10 +59,10 @@ const Posts: React.FC = () => {
     let toBeUpdated: Array<any> = [];
     await Promise.all(rows.map(async row => {
       try {
-        await axios.put(`https://jsonplaceholder.typicode.com/posts/${row.id}`, {
+        const { data: responseData } = await axios.put(`https://jsonplaceholder.typicode.com/posts/${row.id}`, {
           ...row
         });
-        toBeUpdated.push(row);
+        toBeUpdated.push({...row, ...responseData});
         closeTab(row.id.toString());
       } catch (err) {
         console.error(err);
@@ -71,14 +70,15 @@ const Posts: React.FC = () => {
     }));
 
 
-    if (gridApi.current) {
-      let newData = [...data];
+    setData(prevData => {
+      let newData = [...prevData];
       toBeUpdated.forEach(update => {
         const index = newData.findIndex(data => data.id === update.id);
         newData[index] = update;
       });
-      setData(newData);
-    }
+
+      return newData;
+    });
 
   };
 
@@ -86,23 +86,25 @@ const Posts: React.FC = () => {
     let toBeDeleted: Array<any> = [];
     await Promise.all(rows.map(async row => {
       try {
-        await axios.delete(`https://jsonplaceholder.typicode.com/posts/${row.id}`);
-        toBeDeleted.push(row);
+        const { data: responseData } = await axios.delete(`https://jsonplaceholder.typicode.com/posts/${row.id}`);
+        toBeDeleted.push({...row, ...responseData});
         closeTab(row.id.toString());
       } catch (err) {
         console.error(err);
       }
     }));
 
-    if (gridApi && gridApi.current) {
-      let newData = [...data];
+    setData(prevData => {
+      let newData = [...prevData];
       toBeDeleted.forEach(remove => {
         const index = newData.findIndex(data => data.id === remove.id);
-        newData = [...newData.slice(0, index), ...newData.slice(index + 1)];
+        newData.splice(index, 1);
       });
+      if (gridApi.current)
+        gridApi.current.redrawRows();
+      return newData;
+    });
 
-      setData(newData);
-    }
 
   };
 
