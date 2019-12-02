@@ -6,7 +6,7 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, ButtonGroup, Nav, Table, Tooltip, Tab, OverlayTrigger, Form, Row, Col, Badge, ButtonToolbar } from 'react-bootstrap';
 import { Animated } from "react-animated-css";
-import { useFormik } from "formik";
+import useForm from "react-hook-form";
 
 import { useSearch, SearchParams, AnyObject } from "./hooks/useSearch";
 
@@ -513,23 +513,22 @@ const View: React.FC<AnyObject> = (props: AnyObject) => {
 const Edit: React.FC<AnyObject> = (props: AnyObject) => {
   const { data, showTab, transitionTimeout, editEntity } = props;
 
-  const formik = useFormik({
-    initialValues: { title: data.title, body: data.body },
-    onSubmit: async values => editEntity([{ ...data, ...values }])
+  const { register, handleSubmit } = useForm({
+    defaultValues: { ...data }
   });
 
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
       <Row>
         <Col xs sm={6} md={4}>
-          <Form className="text-left" onSubmit={formik.handleSubmit}>
+          <Form className="text-left" onSubmit={handleSubmit(async values => editEntity([{ ...data, ...values }]))}>
             <Form.Group controlId="title">
               <Form.Label>Title</Form.Label>
-              <Form.Control type="text" name="title" value={formik.values.title} onChange={formik.handleChange} />
+              <Form.Control type="text" name="title" ref={register} />
             </Form.Group>
             <Form.Group controlId="body">
               <Form.Label>Body</Form.Label>
-              <Form.Control type="text" name="body" value={formik.values.body} onChange={formik.handleChange} />
+              <Form.Control type="text" name="body" ref={register} />
             </Form.Group>
 
             <Button variant="primary" type="submit">Submit</Button>
@@ -544,23 +543,20 @@ const Edit: React.FC<AnyObject> = (props: AnyObject) => {
 const Create: React.FC<AnyObject> = (props: AnyObject) => {
   const { showTab, transitionTimeout, createEntity } = props;
 
-  const formik = useFormik({
-    initialValues: { title: "", body: "" },
-    onSubmit: async values => createEntity([{ ...values }])
-  });
+  const { register, handleSubmit } = useForm();
 
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
       <Row>
         <Col xs sm={6} md={4}>
-          <Form className="text-left" onSubmit={formik.handleSubmit}>
+          <Form className="text-left" onSubmit={handleSubmit(async values => createEntity([{ ...values }]))}>
             <Form.Group controlId="title">
               <Form.Label>Title</Form.Label>
-              <Form.Control type="text" name="title" value={formik.values.title} onChange={formik.handleChange} />
+              <Form.Control type="text" name="title" ref={register} />
             </Form.Group>
             <Form.Group controlId="body">
               <Form.Label>Body</Form.Label>
-              <Form.Control type="text" name="body" value={formik.values.body} onChange={formik.handleChange} />
+              <Form.Control type="text" name="body" ref={register} />
             </Form.Group>
 
             <Button variant="primary" type="submit">Submit</Button>
