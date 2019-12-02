@@ -33,31 +33,26 @@ const Posts: React.FC = () => {
       on: "userId"
     }
   });
-  const [data, loading] = useSearch(query);
+  const [data, setData, loading] = useSearch(query);
 
   const createRows = async (rows: Array<any>) => {
     let toBeCreated: Array<any> = [];
     await Promise.all(rows.map(async row => {
+      const user = JSON.parse(row.user);
+      row = { ...row, userId: user.id, username: user.name }
       try {
-        await axios.post(`https://jsonplaceholder.typicode.com/posts`, {
-          ...row, userId: 1
+        const { data: responseData } = await axios.post(`https://jsonplaceholder.typicode.com/posts`, {
+          ...row, userId: JSON.parse(row.user).id
         });
-        toBeCreated.push(row);
+        toBeCreated.push(responseData);
         closeTab("Create");
       } catch (err) {
         console.error(err);
       }
     }));
 
-    if (gridApi.current) {
-      let newData = [...data];
-      const transactions = gridApi.current.updateRowData({ add: toBeCreated });
-
-      transactions.add.forEach(transaction => {
-        newData = [...newData, transaction.data];
-      });
-      gridApi.current.setRowData(newData);
-    }
+    let newData = [...data, ...toBeCreated];
+    setData(newData);
 
   };
 
@@ -78,13 +73,11 @@ const Posts: React.FC = () => {
 
     if (gridApi.current) {
       let newData = [...data];
-      const transactions = gridApi.current.updateRowData({ update: toBeUpdated });
-
-      transactions.update.forEach(transaction => {
-        const index = newData.findIndex(data => data.id === transaction.data.id);
-        newData[index] = transaction.data;
+      toBeUpdated.forEach(update => {
+        const index = newData.findIndex(data => data.id === update.id);
+        newData[index] = update;
       });
-      gridApi.current.setRowData(newData);
+      setData(newData);
     }
 
   };
@@ -103,12 +96,12 @@ const Posts: React.FC = () => {
 
     if (gridApi && gridApi.current) {
       let newData = [...data];
-      const transactions = gridApi.current.updateRowData({ remove: toBeDeleted });
-
-      transactions.remove.forEach(transaction => {
-        const index = newData.findIndex(data => data.id === transaction.data.id);
+      toBeDeleted.forEach(remove => {
+        const index = newData.findIndex(data => data.id === remove.id);
         newData = [...newData.slice(0, index), ...newData.slice(index + 1)];
       });
+
+      setData(newData);
     }
 
   };
@@ -155,7 +148,6 @@ const Posts: React.FC = () => {
       setTimeout(() => setExtraTabs(prevTabs => [...prevTabs.slice(0, tabIndex), ...prevTabs.slice(tabIndex + 1)]), transitionTimeout);
     }
   };
-
 
   const columnDefs: Array<ColDef> = [{
     checkboxSelection: true,
@@ -223,7 +215,7 @@ const Posts: React.FC = () => {
     gridApi.current = params.api;
     columnApi.current = params.columnApi;
     gridApi.current.sizeColumnsToFit();
-  }
+  };
 
   const handleOnSelectChange = (value: any) => {
     setSelectedOptions(value);
@@ -334,7 +326,6 @@ const Posts: React.FC = () => {
                     gridOptions={gridOptions}
                     rowData={data}
                     modules={AllCommunityModules}
-                    animateRows
                     pagination
                     paginationAutoPageSize
                     rowSelection="multiple"
@@ -542,6 +533,7 @@ const Edit: React.FC<AnyObject> = (props: AnyObject) => {
 
 const Create: React.FC<AnyObject> = (props: AnyObject) => {
   const { showTab, transitionTimeout, createEntity } = props;
+  const [ usersData ] = useSearch("https://jsonplaceholder.typicode.com/users");
 
   const { register, handleSubmit } = useForm();
 
@@ -550,6 +542,12 @@ const Create: React.FC<AnyObject> = (props: AnyObject) => {
       <Row>
         <Col xs sm={6} md={4}>
           <Form className="text-left" onSubmit={handleSubmit(async values => createEntity([{ ...values }]))}>
+            <Form.Group controlId="user">
+              <Form.Label>User</Form.Label>
+              <Form.Control as="select" name="user" ref={register}>
+                {usersData.map(user => <option key={user.id} value={JSON.stringify(user)}>{user.name}</option>)}
+              </Form.Control>
+            </Form.Group>
             <Form.Group controlId="title">
               <Form.Label>Title</Form.Label>
               <Form.Control type="text" name="title" ref={register} />
