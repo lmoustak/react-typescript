@@ -100,8 +100,11 @@ const Posts: React.FC = () => {
         const index = newData.findIndex(data => data.id === remove.id);
         newData.splice(index, 1);
       });
-      if (gridApi.current)
+      
+      if (gridApi.current) {
         gridApi.current.redrawRows();
+      }
+
       return newData;
     });
 
