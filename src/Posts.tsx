@@ -39,7 +39,7 @@ const Posts: React.FC = () => {
   const createRows = async (rows: Array<any>) => {
     let toBeCreated: Array<any> = [];
     await Promise.all(rows.map(async row => {
-      const user = row.user.value;
+      const user = row.user;
       row = { ...row, userId: user.id, username: user.name }
       try {
         const { data: responseData } = await axios.post(`https://jsonplaceholder.typicode.com/posts`, {
@@ -546,7 +546,7 @@ const Create: React.FC<AnyObject> = (props: AnyObject) => {
 
   useEffect(() => {
     register({ name: "user" });
-  }, [register])
+  }, [register]);
 
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
@@ -563,7 +563,7 @@ const Create: React.FC<AnyObject> = (props: AnyObject) => {
                 value={selectedUser.userOption}
                 onChange={
                   (userOption: any) => {
-                    setValue("user", userOption);
+                    setValue("user", userOption.value);
                     setSelectedUser({ userOption });
                   }
                 }
