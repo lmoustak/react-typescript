@@ -37,16 +37,15 @@ const Posts: React.FC = () => {
   const [data, setData, loading] = useSearch(query);
 
   const createRows = async (rows: Array<any>) => {
-    console.log("creating...")
     let toBeCreated: Array<any> = [];
     await Promise.all(rows.map(async row => {
-      const user = JSON.parse(row.user);
+      const user = row.user.value;
       row = { ...row, userId: user.id, username: user.name }
       try {
         const { data: responseData } = await axios.post(`https://jsonplaceholder.typicode.com/posts`, {
-          ...row, userId: JSON.parse(row.user).id
+          ...row, userId: row.user.id
         });
-        toBeCreated.push({...row, ...responseData});
+        toBeCreated.push({ ...row, ...responseData });
         closeTab("Create");
       } catch (err) {
         console.error(err);
@@ -64,7 +63,7 @@ const Posts: React.FC = () => {
         const { data: responseData } = await axios.put(`https://jsonplaceholder.typicode.com/posts/${row.id}`, {
           ...row
         });
-        toBeUpdated.push({...row, ...responseData});
+        toBeUpdated.push({ ...row, ...responseData });
         closeTab(row.id.toString());
       } catch (err) {
         console.error(err);
@@ -89,7 +88,7 @@ const Posts: React.FC = () => {
     await Promise.all(rows.map(async row => {
       try {
         const { data: responseData } = await axios.delete(`https://jsonplaceholder.typicode.com/posts/${row.id}`);
-        toBeDeleted.push({...row, ...responseData});
+        toBeDeleted.push({ ...row, ...responseData });
         closeTab(row.id.toString());
       } catch (err) {
         console.error(err);
@@ -102,7 +101,7 @@ const Posts: React.FC = () => {
         const index = newData.findIndex(data => data.id === remove.id);
         newData.splice(index, 1);
       });
-      
+
       if (gridApi.current) {
         gridApi.current.redrawRows();
       }
@@ -540,27 +539,45 @@ const Edit: React.FC<AnyObject> = (props: AnyObject) => {
 
 const Create: React.FC<AnyObject> = (props: AnyObject) => {
   const { showTab, transitionTimeout, createEntity } = props;
-  const [ usersData ] = useSearch("https://jsonplaceholder.typicode.com/users");
-  const [selectedUser, setSelectedUser] = useState("{}");
+  const [usersData] = useSearch("https://jsonplaceholder.typicode.com/users");
+  const [selectedUser, setSelectedUser] = useState({ userOption: {} });
 
   const { register, handleSubmit, setValue } = useForm();
+
+  useEffect(() => {
+    register({ name: "user" });
+  }, [register])
 
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
       <Row>
         <Col xs sm={6} md={4}>
-          <Form className="text-left" onSubmit={handleSubmit(async values => {console.log(values); createEntity([{ ...values }])})}>
+          <Form className="text-left" onSubmit={handleSubmit(async values => createEntity([{ ...values }]))}>
             <Form.Group controlId="user">
               <Form.Label>User</Form.Label>
-              <Form.Control as="select" name="user" ref={register}>
+              {/* <Form.Control as="select" name="user" ref={register}>
                 {usersData.map(user => <option key={user.id} value={JSON.stringify(user)}>{user.name}</option>)}
-              </Form.Control>
+              </Form.Control> */}
+              <Select
+                options={usersData.map(user => ({ value: user, label: user.name }))}
+                value={selectedUser.userOption}
+                onChange={
+                  (userOption: any) => {
+                    setValue("user", userOption);
+                    setSelectedUser({ userOption });
+                  }
+                }
+
+              />
               {/* <RHFInput
                 as={
                   <Select
                     options={usersData.map(user => ({ value: JSON.stringify(user), label: user.name }))}
-                    onChange={(value: any) => {setSelectedUser(value as string)}}
-                    value={selectedUser}
+                    onChange={(value: any) => {
+                      setValue("user")
+                      setSelectedUser(value as string)
+                    }}
+                    value={selectedUser.userOption}
                   />
                 }
                 name="user"
