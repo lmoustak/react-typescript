@@ -1,19 +1,20 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
-import { AgGridReact } from '@ag-grid-community/react';
-import { AllCommunityModules, GridApi, GridReadyEvent, ColumnApi, ColDef, DragStoppedEvent, GridOptions, ICellRendererParams } from '@ag-grid-community/all-modules';
-import Select from 'react-select';
+import React, { useState, useEffect, useRef, useContext } from "react";
+import { AgGridReact } from "@ag-grid-community/react";
+import { AllCommunityModules, GridApi, GridReadyEvent, ColumnApi, ColDef, DragStoppedEvent, GridOptions, ICellRendererParams } from "@ag-grid-community/all-modules";
+import Select from "react-select";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, ButtonGroup, Nav, Table, Tooltip, Tab, OverlayTrigger, Form, Row, Col, Badge, ButtonToolbar } from 'react-bootstrap';
+import { Button, ButtonGroup, Nav, Table, Tooltip, Tab, OverlayTrigger, Form, Row, Col, Badge, ButtonToolbar } from "react-bootstrap";
 import { Animated } from "react-animated-css";
 import useForm from "react-hook-form";
+import { RHFInput } from "react-hook-form-input";
 
 import { useSearch, SearchParams, AnyObject } from "./hooks/useSearch";
 
-import '@ag-grid-community/all-modules/dist/styles/ag-grid.css';
-import '@ag-grid-community/all-modules/dist/styles/ag-theme-balham.css';
-import '@ag-grid-community/all-modules/dist/styles/ag-theme-balham-dark.css';
-import '@ag-grid-community/all-modules/dist/styles/ag-theme-material.css';
+import "@ag-grid-community/all-modules/dist/styles/ag-grid.css";
+import "@ag-grid-community/all-modules/dist/styles/ag-theme-balham.css";
+import "@ag-grid-community/all-modules/dist/styles/ag-theme-balham-dark.css";
+import "@ag-grid-community/all-modules/dist/styles/ag-theme-material.css";
 
 const GridContext: React.Context<AnyObject> = React.createContext<AnyObject>({});
 
@@ -36,6 +37,7 @@ const Posts: React.FC = () => {
   const [data, setData, loading] = useSearch(query);
 
   const createRows = async (rows: Array<any>) => {
+    console.log("creating...")
     let toBeCreated: Array<any> = [];
     await Promise.all(rows.map(async row => {
       const user = JSON.parse(row.user);
@@ -539,19 +541,36 @@ const Edit: React.FC<AnyObject> = (props: AnyObject) => {
 const Create: React.FC<AnyObject> = (props: AnyObject) => {
   const { showTab, transitionTimeout, createEntity } = props;
   const [ usersData ] = useSearch("https://jsonplaceholder.typicode.com/users");
+  const [selectedUser, setSelectedUser] = useState("{}");
 
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, setValue } = useForm();
 
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
       <Row>
         <Col xs sm={6} md={4}>
-          <Form className="text-left" onSubmit={handleSubmit(async values => createEntity([{ ...values }]))}>
+          <Form className="text-left" onSubmit={handleSubmit(async values => {console.log(values); createEntity([{ ...values }])})}>
             <Form.Group controlId="user">
               <Form.Label>User</Form.Label>
               <Form.Control as="select" name="user" ref={register}>
                 {usersData.map(user => <option key={user.id} value={JSON.stringify(user)}>{user.name}</option>)}
               </Form.Control>
+              {/* <RHFInput
+                as={
+                  <Select
+                    options={usersData.map(user => ({ value: JSON.stringify(user), label: user.name }))}
+                    onChange={(value: any) => {setSelectedUser(value as string)}}
+                    value={selectedUser}
+                  />
+                }
+                name="user"
+                register={register}
+                setValue={setValue}
+                onChange={event => {
+                  setValue("user", event.value);
+                  setSelectedUser(event.value);
+                }}
+              /> */}
             </Form.Group>
             <Form.Group controlId="title">
               <Form.Label>Title</Form.Label>
