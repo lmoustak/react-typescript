@@ -39,7 +39,7 @@ const Posts: React.FC = () => {
   const createRows = async (rows: Array<any>) => {
     let toBeCreated: Array<any> = [];
     await Promise.all(rows.map(async row => {
-      const user = row.user;
+      const user = row.user.value;
       row = { ...row, userId: user.id, username: user.name }
       try {
         const { data: responseData } = await axios.post(`https://jsonplaceholder.typicode.com/posts`, {
@@ -542,11 +542,12 @@ const Create: React.FC<AnyObject> = (props: AnyObject) => {
   const [usersData] = useSearch("https://jsonplaceholder.typicode.com/users");
   const [selectedUser, setSelectedUser] = useState({ userOption: {} });
 
-  const { register, handleSubmit, setValue } = useForm();
+  const { register, handleSubmit, setValue, errors, setError, clearError } = useForm();
 
   useEffect(() => {
-    register({ name: "user" });
-  }, [register]);
+    register({ name: "user"});
+    setError("user", "required", "Required");
+  }, [register, setError]);
 
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
@@ -560,15 +561,22 @@ const Create: React.FC<AnyObject> = (props: AnyObject) => {
               </Form.Control> */}
               <Select
                 options={usersData.map(user => ({ value: user, label: user.name }))}
+                isClearable
                 value={selectedUser.userOption}
                 onChange={
                   (userOption: any) => {
-                    setValue("user", userOption.value);
+                    setValue("user", userOption);
                     setSelectedUser({ userOption });
+                    if (userOption == null) {
+                      setError("user", "required");
+                    } else {
+                      clearError("user");
+                    }
                   }
                 }
 
               />
+              {errors.user && <span style={{color: "red"}}>Required</span>}
               {/* <RHFInput
                 as={
                   <Select
@@ -583,14 +591,16 @@ const Create: React.FC<AnyObject> = (props: AnyObject) => {
             </Form.Group>
             <Form.Group controlId="title">
               <Form.Label>Title</Form.Label>
-              <Form.Control type="text" name="title" ref={register} />
+              <Form.Control type="text" name="title" ref={register({required: true}) as any} />
+              {errors.title && <span style={{color: "red"}}>Required</span>}
             </Form.Group>
             <Form.Group controlId="body">
               <Form.Label>Body</Form.Label>
-              <Form.Control type="text" name="body" ref={register} />
+              <Form.Control type="text" name="body" ref={register({required: true}) as any} />
+              {errors.body && <span style={{color: "red"}}>Required</span>}
             </Form.Group>
-
-            <Button variant="primary" type="submit">Submit</Button>
+            
+            <Button variant="primary" type="submit" disabled={Object.keys(errors).length > 0}>Submit</Button>
           </Form>
         </Col>
       </Row>
