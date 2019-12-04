@@ -572,21 +572,13 @@ const Create: React.FC<AnyObject> = (props: AnyObject) => {
               {/* <RHFInput
                 as={
                   <Select
-                    options={usersData.map(user => ({ value: JSON.stringify(user), label: user.name }))}
-                    onChange={(value: any) => {
-                      setValue("user")
-                      setSelectedUser(value as string)
-                    }}
-                    value={selectedUser.userOption}
+                    options={usersData.map(user => ({ value: user, label: user.name }))}
+                    isMulti
                   />
                 }
                 name="user"
                 register={register}
                 setValue={setValue}
-                onChange={event => {
-                  setValue("user", event.value);
-                  setSelectedUser(event.value);
-                }}
               /> */}
             </Form.Group>
             <Form.Group controlId="title">
