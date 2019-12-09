@@ -540,14 +540,8 @@ const Edit: React.FC<AnyObject> = (props: AnyObject) => {
 const Create: React.FC<AnyObject> = (props: AnyObject) => {
   const { showTab, transitionTimeout, createEntity } = props;
   const [usersData] = useSearch("https://jsonplaceholder.typicode.com/users");
-  const [selectedUser, setSelectedUser] = useState({ userOption: {} });
 
-  const { register, handleSubmit, setValue, errors, setError, clearError } = useForm();
-
-  useEffect(() => {
-    register({ name: "user"});
-    setError("user", "required", "Required");
-  }, [register, setError]);
+  const { register, handleSubmit, setValue, errors, clearError } = useForm();
 
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
@@ -556,38 +550,23 @@ const Create: React.FC<AnyObject> = (props: AnyObject) => {
           <Form className="text-left" onSubmit={handleSubmit(async values => createEntity([{ ...values }]))}>
             <Form.Group controlId="user">
               <Form.Label>User</Form.Label>
-              {/* <Form.Control as="select" name="user" ref={register}>
-                {usersData.map(user => <option key={user.id} value={JSON.stringify(user)}>{user.name}</option>)}
-              </Form.Control> */}
-              <Select
-                options={usersData.map(user => ({ value: user, label: user.name }))}
-                isClearable
-                value={selectedUser.userOption}
-                onChange={
-                  (userOption: any) => {
-                    setValue("user", userOption);
-                    setSelectedUser({ userOption });
-                    if (userOption == null) {
-                      setError("user", "required");
-                    } else {
-                      clearError("user");
-                    }
-                  }
-                }
-
-              />
-              {errors.user && <span style={{color: "red"}}>Required</span>}
-              {/* <RHFInput
+              <RHFInput
                 as={
                   <Select
                     options={usersData.map(user => ({ value: user, label: user.name }))}
-                    isMulti
                   />
                 }
+                rules={{required: true}}
                 name="user"
                 register={register}
                 setValue={setValue}
-              /> */}
+                onChange={data => {
+                  if (data != null) {
+                    clearError("user");
+                  }
+                }}
+              />
+              {errors.user && <span style={{color: "red"}}>Required</span>}
             </Form.Group>
             <Form.Group controlId="title">
               <Form.Label>Title</Form.Label>
