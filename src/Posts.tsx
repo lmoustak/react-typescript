@@ -551,11 +551,7 @@ const Create: React.FC<AnyObject> = (props: AnyObject) => {
             <Form.Group controlId="user">
               <Form.Label>User</Form.Label>
               <RHFInput
-                as={
-                  <Select
-                    options={usersData.map(user => ({ value: user, label: user.name }))}
-                  />
-                }
+                as={<Select options={usersData.map(user => ({ value: user, label: user.name }))} isClearable /> as any}
                 rules={{required: true}}
                 name="user"
                 register={register}
