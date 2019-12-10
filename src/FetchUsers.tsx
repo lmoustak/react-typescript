@@ -6,13 +6,13 @@ import User from './interfaces/User';
 import { Table, InputGroup, FormControl, Button } from 'react-bootstrap';
 
 interface UserProps {
-  users: Array<User>
+  users: User[]
 };
 
 const FetchUsers: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
-  const [users, setUsers] = useState<Array<User>>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [nameFilter, setNameFilter] = useState('');
   const [usernameFilter, setUsernameFilter] = useState('');
   const [emailFilter, setEmailFilter] = useState('');

@@ -20,7 +20,7 @@ const GridContext: React.Context<AnyObject> = React.createContext<AnyObject>({})
 
 const Posts: React.FC = () => {
   const transitionTimeout = 500;
-  const [extraTabs, setExtraTabs] = useState<Array<AnyObject>>([]);
+  const [extraTabs, setExtraTabs] = useState<AnyObject[]>([]);
   const [activeTab, setActiveTab] = useState<string>("Results");
 
   // eslint-disable-next-line
@@ -36,8 +36,8 @@ const Posts: React.FC = () => {
   });
   const [data, setData, loading] = useSearch(query);
 
-  const createRows = async (rows: Array<any>) => {
-    let toBeCreated: Array<any> = [];
+  const createRows = async (rows: any[]) => {
+    let toBeCreated: any[] = [];
     await Promise.all(rows.map(async row => {
       const user = row.user.value;
       row = { ...row, userId: user.id, username: user.name }
@@ -56,8 +56,8 @@ const Posts: React.FC = () => {
 
   };
 
-  const editRows = async (rows: Array<any>) => {
-    let toBeUpdated: Array<any> = [];
+  const editRows = async (rows: any[]) => {
+    let toBeUpdated: any[] = [];
     await Promise.all(rows.map(async row => {
       try {
         const { data: responseData } = await axios.put(`https://jsonplaceholder.typicode.com/posts/${row.id}`, {
@@ -83,8 +83,8 @@ const Posts: React.FC = () => {
 
   };
 
-  const deleteRows = async (rows: Array<any>) => {
-    let toBeDeleted: Array<any> = [];
+  const deleteRows = async (rows: any[]) => {
+    let toBeDeleted: any[] = [];
     await Promise.all(rows.map(async row => {
       try {
         const { data: responseData } = await axios.delete(`https://jsonplaceholder.typicode.com/posts/${row.id}`);
@@ -155,7 +155,7 @@ const Posts: React.FC = () => {
     }
   };
 
-  const columnDefs: Array<ColDef> = [{
+  const columnDefs: ColDef[] = [{
     checkboxSelection: true,
     headerCheckboxSelection: true,
     width: 40,
@@ -204,11 +204,11 @@ const Posts: React.FC = () => {
 
 
 
-  const options: Array<AnyObject> = columnDefs
+  const options: AnyObject[] = columnDefs
     .filter(column => column.headerName && column.headerName !== "Actions")
     .map(column => ({ value: column.field, label: column.headerName }));
 
-  const defaultOptions: Array<AnyObject> = columnDefs
+  const defaultOptions: AnyObject[] = columnDefs
     .filter(column => column.headerName && !column.hide && column.headerName !== "Actions")
     .map(column => ({ value: column.field, label: column.headerName }));
 

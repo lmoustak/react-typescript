@@ -37,7 +37,7 @@ export interface JoinParams {
  */
 export interface SearchParams {
   url: string,
-  joins?: JoinParams | Array<JoinParams>
+  joins?: JoinParams | JoinParams[]
 };
 
 /**
@@ -48,8 +48,8 @@ export interface SearchParams {
  * @retuns The [data, loading] tuple
  */
 const useSearch = (query: string | SearchParams = ""):
-  [Array<AnyObject>, React.Dispatch<React.SetStateAction<Array<AnyObject>>>, boolean] => {
-  const [data, setData] = useState<Array<AnyObject>>([]);
+  [AnyObject[], React.Dispatch<React.SetStateAction<AnyObject[]>>, boolean] => {
+  const [data, setData] = useState<AnyObject[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -86,7 +86,7 @@ const useSearch = (query: string | SearchParams = ""):
               .map((item: any) => item[originalField])
               .filter((value, index, self) => value != null && self.indexOf(value) === index);
 
-            let results: Array<any> = [];
+            let results: any[] = [];
 
             await Promise.all(distinctValues.map(async value => {
               try {
