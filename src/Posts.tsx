@@ -510,8 +510,9 @@ const View: React.FC<AnyObject> = (props: AnyObject) => {
 const Edit: React.FC<AnyObject> = (props: AnyObject) => {
   const { data, showTab, transitionTimeout, editEntity } = props;
 
-  const { register, handleSubmit } = useForm({
-    defaultValues: { ...data }
+  const { register, handleSubmit, errors } = useForm({
+    defaultValues: { ...data },
+    mode: "onBlur"
   });
 
   return (
@@ -521,14 +522,16 @@ const Edit: React.FC<AnyObject> = (props: AnyObject) => {
           <Form className="text-left" onSubmit={handleSubmit(async values => editEntity([{ ...data, ...values }]))}>
             <Form.Group controlId="title">
               <Form.Label>Title</Form.Label>
-              <Form.Control type="text" name="title" ref={register} />
+              <Form.Control type="text" name="title" ref={register({required: true}) as any} />
+              {errors.title && <span style={{color: "red"}}>Required</span>}
             </Form.Group>
             <Form.Group controlId="body">
               <Form.Label>Body</Form.Label>
-              <Form.Control type="text" name="body" ref={register} />
+              <Form.Control type="text" name="body" ref={register({required: true}) as any} />
+              {errors.body && <span style={{color: "red"}}>Required</span>}
             </Form.Group>
 
-            <Button variant="primary" type="submit">Submit</Button>
+            <Button variant="primary" type="submit" disabled={Object.keys(errors).length > 0}>Submit</Button>
           </Form>
         </Col>
       </Row>
@@ -541,7 +544,7 @@ const Create: React.FC<AnyObject> = (props: AnyObject) => {
   const { showTab, transitionTimeout, createEntity } = props;
   const [usersData] = useSearch("https://jsonplaceholder.typicode.com/users");
 
-  const { register, handleSubmit, setValue, errors, clearError } = useForm();
+  const { register, handleSubmit, setValue, errors } = useForm({ mode: "onBlur" });
 
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
@@ -551,16 +554,12 @@ const Create: React.FC<AnyObject> = (props: AnyObject) => {
             <Form.Group controlId="user">
               <Form.Label>User</Form.Label>
               <RHFInput
-                as={<Select options={usersData.map(user => ({ value: user, label: user.name }))} isClearable /> as any}
+                as={<Select options={usersData.map(user => ({ value: user, label: user.name }))} isClearable />}
                 rules={{required: true}}
                 name="user"
                 register={register}
                 setValue={setValue}
-                onChange={data => {
-                  if (data != null) {
-                    clearError("user");
-                  }
-                }}
+                mode="onChange"
               />
               {errors.user && <span style={{color: "red"}}>Required</span>}
             </Form.Group>
