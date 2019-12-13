@@ -510,9 +510,7 @@ const View: React.FC<AnyObject> = (props: AnyObject) => {
 const Edit: React.FC<AnyObject> = (props: AnyObject) => {
   const { data, showTab, transitionTimeout, editEntity } = props;
 
-  const { register, handleSubmit, setValue, errors } = useForm({
-    defaultValues: { ...data }
-  });
+  const { register, handleSubmit, errors } = useForm({defaultValues: { ...data }, mode: "onBlur"});
 
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
@@ -521,26 +519,12 @@ const Edit: React.FC<AnyObject> = (props: AnyObject) => {
           <Form className="text-left" onSubmit={handleSubmit(async values => editEntity([{ ...data, ...values }]))}>
             <Form.Group controlId="title">
               <Form.Label>Title</Form.Label>
-              <RHFInput
-                as={<Form.Control type="text" />}
-                name="title"
-                rules={{ required: true }}
-                register={register}
-                setValue={setValue}
-                mode="onChange"
-              />
+              <input type="text" className="form-control" name="title" ref={register({required: true})}/>
               {errors.title && <span style={{color: "red"}}>Required</span>}
             </Form.Group>
             <Form.Group controlId="body">
               <Form.Label>Body</Form.Label>
-              <RHFInput
-                as={<Form.Control type="text" />}
-                name="body"
-                rules={{ required: true }}
-                register={register}
-                setValue={setValue}
-                mode="onChange"
-              />
+              <input type="text" className="form-control" name="body" ref={register({required: true})}/>
               {errors.body && <span style={{color: "red"}}>Required</span>}
             </Form.Group>
 
@@ -578,26 +562,12 @@ const Create: React.FC<AnyObject> = (props: AnyObject) => {
             </Form.Group>
             <Form.Group controlId="title">
               <Form.Label>Title</Form.Label>
-              <RHFInput
-                as={<Form.Control type="text" />}
-                name="title"
-                rules={{ required: true }}
-                register={register}
-                setValue={setValue}
-                mode="onChange"
-              />
+              <input type="text" className="form-control" name="title" ref={register({required: true})}/>
               {errors.title && <span style={{color: "red"}}>Required</span>}
             </Form.Group>
             <Form.Group controlId="body">
               <Form.Label>Body</Form.Label>
-              <RHFInput
-                as={<Form.Control type="text" />}
-                name="body"
-                rules={{ required: true }}
-                register={register}
-                setValue={setValue}
-                mode="onChange"
-              />
+              <input type="text" className="form-control" name="body" ref={register({required: true})}/>
               {errors.body && <span style={{color: "red"}}>Required</span>}
             </Form.Group>
             
