@@ -6,8 +6,7 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, ButtonGroup, Nav, Table, Tooltip, Tab, OverlayTrigger, Form, Row, Col, Badge, ButtonToolbar } from "react-bootstrap";
 import { Animated } from "react-animated-css";
-import useForm from "react-hook-form";
-import { RHFInput } from "react-hook-form-input";
+import { useForm, Controller } from "react-hook-form";
 
 import { useSearch, SearchParams, AnyObject } from "./hooks/useSearch";
 
@@ -541,7 +540,7 @@ const Create: React.FC<AnyObject> = (props: AnyObject) => {
   const { showTab, transitionTimeout, createEntity } = props;
   const [usersData] = useSearch("https://jsonplaceholder.typicode.com/users");
 
-  const { register, handleSubmit, setValue, errors } = useForm({ mode: "onBlur" });
+  const { register, handleSubmit, errors, control } = useForm({ mode: "onBlur" });
 
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
@@ -550,13 +549,13 @@ const Create: React.FC<AnyObject> = (props: AnyObject) => {
           <Form className="text-left" onSubmit={handleSubmit(async values => createEntity([{ ...values }]))}>
             <Form.Group controlId="user">
               <Form.Label>User</Form.Label>
-              <RHFInput
+              <Controller
                 as={<Select options={usersData.map(user => ({ value: user, label: user.name }))} isClearable />}
                 rules={{required: true}}
                 name="user"
-                register={register}
-                setValue={setValue}
-                mode="onChange"
+                control={control}
+                onBlurName="onChange"
+                onBlur={([selected]) => ({ value: selected })}
               />
               {errors.user && <span style={{color: "red"}}>Required</span>}
             </Form.Group>
