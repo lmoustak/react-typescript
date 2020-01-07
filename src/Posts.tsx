@@ -462,7 +462,7 @@ const ExtraTab: React.FC<any> = props => {
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            style={isHovered ? { color: "red" } : { color: "initial" }}
+            className={isHovered ? "text-danger" : undefined}
           />
 
         </Nav.Link>
@@ -519,12 +519,12 @@ const Edit: React.FC<AnyObject> = (props: AnyObject) => {
             <Form.Group controlId="title">
               <Form.Label>Title</Form.Label>
               <input type="text" className="form-control" name="title" ref={register({required: true})}/>
-              {errors.title && <span style={{color: "red"}}>Required</span>}
+              {errors.title && <span className="text-danger">Required</span>}
             </Form.Group>
             <Form.Group controlId="body">
               <Form.Label>Body</Form.Label>
               <input type="text" className="form-control" name="body" ref={register({required: true})}/>
-              {errors.body && <span style={{color: "red"}}>Required</span>}
+              {errors.body && <span className="text-danger">Required</span>}
             </Form.Group>
 
             <Button variant="primary" type="submit" disabled={Object.keys(errors).length > 0}>Submit</Button>
@@ -557,17 +557,17 @@ const Create: React.FC<AnyObject> = (props: AnyObject) => {
                 onBlurName="onChange"
                 onBlur={([selected]) => ({ value: selected })}
               />
-              {errors.user && <span style={{color: "red"}}>Required</span>}
+              {errors.user && <span className="text-danger">Required</span>}
             </Form.Group>
             <Form.Group controlId="title">
               <Form.Label>Title</Form.Label>
               <input type="text" className="form-control" name="title" ref={register({required: true})}/>
-              {errors.title && <span style={{color: "red"}}>Required</span>}
+              {errors.title && <span className="text-danger">Required</span>}
             </Form.Group>
             <Form.Group controlId="body">
               <Form.Label>Body</Form.Label>
               <input type="text" className="form-control" name="body" ref={register({required: true})}/>
-              {errors.body && <span style={{color: "red"}}>Required</span>}
+              {errors.body && <span className="text-danger">Required</span>}
             </Form.Group>
             
             <Button variant="primary" type="submit" disabled={Object.keys(errors).length > 0}>Submit</Button>
