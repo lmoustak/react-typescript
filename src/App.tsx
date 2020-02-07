@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BrowserRouter as Router,
   Switch,
@@ -11,10 +11,11 @@ import { Row, Col, Navbar, Nav, Container } from "react-bootstrap";
 import { useTrail, useTransition, animated } from "react-spring";
 
 import './App.css';
-import './styles.css'
+import './styles.css';
 import Counter from './Counter';
 import FetchUsers from './FetchUsers';
 import Posts from './Posts';
+import { usePrevious } from "./hooks/usePrevious";
 
 const App: React.FC = () => (
   <Router basename="/react-typescript">
@@ -23,12 +24,13 @@ const App: React.FC = () => (
 );
 
 const AnimatedPages: React.FC = () => {
+  const [currentPage, setCurrentPage] = useState("");
+  const previousPage = usePrevious(currentPage);
   const location = useLocation();
-  const transitions = useTransition(location, location => location.pathname, {
-    from: { opacity: 0, transform: 'scale(0.8)' },
-    enter: { opacity: 1, transform: 'scale(1)' },
-    leave: { opacity: 0, transform: 'scale(1.2)' },
-  });
+
+  useEffect(() => {
+    setCurrentPage(location.pathname);
+  }, [location.pathname]);
 
   const navbarItems = [
     { title: "Home", linkTo: "/", exact: true },
@@ -36,12 +38,20 @@ const AnimatedPages: React.FC = () => {
     { title: "Users", linkTo: "/users" },
     { title: "Posts", linkTo: "/posts" },
   ];
+  const paths = navbarItems.map(item => item.linkTo);
+
+  const transitions = useTransition(location, location => location.pathname, {
+    from: location => ({ opacity: 0, transform: `translate3d(${Math.sign(paths.indexOf(location.pathname) - paths.indexOf(previousPage ?? "")) * 20}%, 0, 0)` }),
+    enter: { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+    leave: { opacity: 0, transform: `translate3d(${Math.sign(paths.indexOf(previousPage ?? "") - paths.indexOf(currentPage)) * 10}%, 0, 0)` },
+  });
+
+  
   const navbarTrail = useTrail(navbarItems.length, {
     opacity: 1,
     transform: "translateX(0)",
     from: { opacity: 0, transform: "translateX(50px)" }
   });
-  const AnimatedNavItem = animated(Nav.Item);
 
 
   const markdown =
@@ -63,9 +73,11 @@ const AnimatedPages: React.FC = () => {
         <Nav className="mr-auto">
           {navbarTrail.map(
             (styles, index) => (
-              <AnimatedNavItem key={navbarItems[index].title} style={styles}>
-                <NavLink className="nav-link" to={navbarItems[index].linkTo} exact={navbarItems[index].exact}>{navbarItems[index].title}</NavLink>
-              </AnimatedNavItem>
+              <animated.div key={navbarItems[index].title} style={styles}>
+                <Nav.Item>
+                  <NavLink className="nav-link" to={navbarItems[index].linkTo} exact={navbarItems[index].exact}>{navbarItems[index].title}</NavLink>
+                </Nav.Item>
+              </animated.div>
             )
           )}
           {/* <Nav.Item>
@@ -107,6 +119,16 @@ const AnimatedPages: React.FC = () => {
               <Route path="/posts">
                 <div className="page">
                   <Posts />
+                </div>
+              </Route>
+              <Route path="*">
+                <div className="page">
+                <Row className="mt-5">
+                  <Col xs>
+                    <h1>404</h1>
+                    <h4>Page not found</h4>
+                  </Col>
+                </Row>
                 </div>
               </Route>
             </Switch>
