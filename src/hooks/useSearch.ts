@@ -3,7 +3,7 @@ import axios from "axios";
 
 export interface AnyObject {
   [key: string]: any
-};
+}
 
 /**
  * An interface to transform given data, akin to JOINing tables in SQL.
@@ -26,7 +26,7 @@ export interface JoinParams {
   on: string,
   path?: string,
   param?: string  // TODO Implement at a later stage...
-};
+}
 
 /**
  * An interface containing parameters for fetching, and - optionally - transforming data
@@ -38,7 +38,7 @@ export interface JoinParams {
 export interface SearchParams {
   url: string,
   joins?: JoinParams | JoinParams[]
-};
+}
 
 /**
  * A Hook designed to fetch data from a URL, and optionally transform it by joining it with other data queries.
@@ -103,13 +103,9 @@ const useSearch = (query: string | SearchParams = ""):
                 if (Array.isArray(result)) {
                   [result] = result;
                 }
-                results.push(result);
+                results = [...results, result];
               } catch (err) {
-                if (err.response) {
-                  console.error(err.response.status);
-                } else {
-                  console.error(err);
-                }
+                console.error(err?.response?.status ?? err);
               }
             }));
 
@@ -126,12 +122,7 @@ const useSearch = (query: string | SearchParams = ""):
         setData(searchData);
 
       } catch (err) {
-        if (err.response) {
-          console.error(err.response.status);
-        } else {
-          console.error(err);
-        }
-
+        console.error(err?.response?.status ?? err);
         setData([]);
       } finally {
         setLoading(false);

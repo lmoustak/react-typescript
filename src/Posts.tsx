@@ -101,9 +101,7 @@ const Posts: React.FC = () => {
         newData.splice(index, 1);
       });
 
-      if (gridApi.current) {
-        gridApi.current.redrawRows();
-      }
+      gridApi.current?.redrawRows();
 
       return newData;
     });
@@ -227,10 +225,8 @@ const Posts: React.FC = () => {
 
     columnDefs.forEach(column => {
       let colIndex = value.findIndex((option: any) => option.value === column.field);
-      if (columnApi.current) {
-        columnApi.current.moveColumn((column.field as string), colIndex + 1);
-        columnApi.current.setColumnVisible((column.field as string), colIndex >= 0);
-      }
+      columnApi.current?.moveColumn((column.field as string), colIndex + 1);
+      columnApi.current?.setColumnVisible((column.field as string), colIndex >= 0);
     });
   };
 
@@ -244,14 +240,12 @@ const Posts: React.FC = () => {
   };
 
   useEffect(() => {
-    if (gridApi.current) {
-      if (loading) {
-        gridApi.current.showLoadingOverlay();
-      } else if (!data.length) {
-        gridApi.current.showNoRowsOverlay();
-      } else {
-        gridApi.current.hideOverlay();
-      }
+    if (loading) {
+      gridApi.current?.showLoadingOverlay();
+    } else if (!data.length) {
+      gridApi.current?.showNoRowsOverlay();
+    } else {
+      gridApi.current?.hideOverlay();
     }
   });
 
