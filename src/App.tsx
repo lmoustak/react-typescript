@@ -6,9 +6,9 @@ import {
   NavLink,
   useLocation
 } from 'react-router-dom';
-import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import ReactMarkdown from 'react-markdown';
 import { Row, Col, Navbar, Nav, Container } from "react-bootstrap";
+import { useTransition, animated } from "react-spring";
 
 import './App.css';
 import './styles.css'
@@ -28,6 +28,11 @@ const App: React.FC = () => (
 
 const AnimatedPages: React.FC = () => {
   const location = useLocation();
+  const transitions = useTransition(location, location => location.pathname, {
+    from: { opacity: 0, transform: 'scale(0.8)' },
+    enter: { opacity: 1, transform: 'scale(1)' },
+    leave: { opacity: 0, transform: 'scale(1.2)' },
+  });
 
   const markdown =
     `# Welcome to the ReactJS playground
@@ -64,12 +69,9 @@ const AnimatedPages: React.FC = () => {
       {/* A <Switch> looks through its children <Route>s and
           renders the first one that matches the current URL. */}
       <Container className="text-center">
-        <TransitionGroup>
-          <CSSTransition key={location.key}
-            classNames="page"
-            timeout={300}
-          >
-            <Switch location={location}>
+        {transitions.map(({ item, props, key }) => (
+          <animated.div key={key} style={props}>
+            <Switch location={item}>
               <Route exact path="/">
                 <div className="page">
                   {startScreen}
@@ -91,9 +93,8 @@ const AnimatedPages: React.FC = () => {
                 </div>
               </Route>
             </Switch>
-
-          </CSSTransition>
-        </TransitionGroup>
+          </animated.div>
+        ))}
       </Container>
 
     </div>
