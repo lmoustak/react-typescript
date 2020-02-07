@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { Row, Col, Navbar, Nav, Container } from "react-bootstrap";
-import { useTransition, animated } from "react-spring";
+import { useTrail, useTransition, animated } from "react-spring";
 
 import './App.css';
 import './styles.css'
@@ -18,11 +18,7 @@ import Posts from './Posts';
 
 const App: React.FC = () => (
   <Router basename="/react-typescript">
-    <Switch>
-      <Route path="*">
-        <AnimatedPages />
-      </Route>
-    </Switch>
+    <AnimatedPages />
   </Router>
 );
 
@@ -33,6 +29,20 @@ const AnimatedPages: React.FC = () => {
     enter: { opacity: 1, transform: 'scale(1)' },
     leave: { opacity: 0, transform: 'scale(1.2)' },
   });
+
+  const navbarItems = [
+    { title: "Home", linkTo: "/", exact: true },
+    { title: "Counter", linkTo: "/counter" },
+    { title: "Users", linkTo: "/users" },
+    { title: "Posts", linkTo: "/posts" },
+  ];
+  const navbarTrail = useTrail(navbarItems.length, {
+    opacity: 1,
+    transform: "translateX(0)",
+    from: { opacity: 0, transform: "translateX(50px)" }
+  });
+  const AnimatedNavItem = animated(Nav.Item);
+
 
   const markdown =
     `# Welcome to the ReactJS playground
@@ -51,7 +61,14 @@ const AnimatedPages: React.FC = () => {
       <Navbar bg="light" expand="sm">
         <Navbar.Brand>React playground</Navbar.Brand>
         <Nav className="mr-auto">
-          <Nav.Item>
+          {navbarTrail.map(
+            (styles, index) => (
+              <AnimatedNavItem key={navbarItems[index].title} style={styles}>
+                <NavLink className="nav-link" to={navbarItems[index].linkTo} exact={navbarItems[index].exact}>{navbarItems[index].title}</NavLink>
+              </AnimatedNavItem>
+            )
+          )}
+          {/* <Nav.Item>
             <NavLink className="nav-link" to="/" exact>Home</NavLink>
           </Nav.Item>
           <Nav.Item>
@@ -62,7 +79,7 @@ const AnimatedPages: React.FC = () => {
           </Nav.Item>
           <Nav.Item>
             <NavLink className="nav-link" to="/posts">Posts</NavLink>
-          </Nav.Item>
+          </Nav.Item> */}
         </Nav>
       </Navbar>
 
