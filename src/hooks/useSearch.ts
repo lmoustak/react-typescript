@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-export interface AnyObject {
-  [key: string]: any
-}
-
 /**
  * An interface to transform given data, akin to JOINing tables in SQL.
  *
@@ -48,8 +44,8 @@ export interface SearchParams {
  * @retuns The [data, loading] tuple
  */
 const useSearch = (query: string | SearchParams = ""):
-  [AnyObject[], React.Dispatch<React.SetStateAction<AnyObject[]>>, boolean] => {
-  const [data, setData] = useState<AnyObject[]>([]);
+  [any[], React.Dispatch<React.SetStateAction<any[]>>, boolean] => {
+  const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {

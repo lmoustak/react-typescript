@@ -8,18 +8,18 @@ import { Button, ButtonGroup, Nav, Table, Tooltip, Tab, OverlayTrigger, Form, Ro
 import { Animated } from "react-animated-css";
 import { useForm, Controller } from "react-hook-form";
 
-import { useSearch, SearchParams, AnyObject } from "./hooks/useSearch";
+import { useSearch, SearchParams } from "./hooks/useSearch";
 
 import "@ag-grid-community/all-modules/dist/styles/ag-grid.css";
 import "@ag-grid-community/all-modules/dist/styles/ag-theme-balham.css";
 import "@ag-grid-community/all-modules/dist/styles/ag-theme-balham-dark.css";
 import "@ag-grid-community/all-modules/dist/styles/ag-theme-material.css";
 
-const GridContext: React.Context<AnyObject> = React.createContext<AnyObject>({});
+const GridContext: React.Context<any> = React.createContext<any>({});
 
 const Posts: React.FC = () => {
   const transitionTimeout = 500;
-  const [extraTabs, setExtraTabs] = useState<AnyObject[]>([]);
+  const [extraTabs, setExtraTabs] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<string>("Results");
 
   // eslint-disable-next-line
@@ -116,7 +116,7 @@ const Posts: React.FC = () => {
 
   };
 
-  const openNewTab = (row: AnyObject | null, tabMode: string = "view") => {
+  const openNewTab = (row: any | null, tabMode: string = "view") => {
     if (row != null) {
       if (!extraTabs.find(tab => tab.id.toString() === row.id.toString())) {
         setExtraTabs(prevTabs => [...prevTabs, { data: { ...row }, show: true, tabMode }]);
@@ -201,11 +201,11 @@ const Posts: React.FC = () => {
 
 
 
-  const options: AnyObject[] = columnDefs
+  const options: any[] = columnDefs
     .filter(column => column.headerName && column.headerName !== "Actions")
     .map(column => ({ value: column.field, label: column.headerName }));
 
-  const defaultOptions: AnyObject[] = columnDefs
+  const defaultOptions: any[] = columnDefs
     .filter(column => column.headerName && !column.hide && column.headerName !== "Actions")
     .map(column => ({ value: column.field, label: column.headerName }));
 
@@ -392,7 +392,7 @@ const Posts: React.FC = () => {
 };
 
 const ActionsCellRenderer = (props: ICellRendererParams) => {
-  const context: AnyObject = useContext(GridContext);
+  const context: any = useContext(GridContext);
   const { data } = props;
   return (
     <ButtonGroup size="sm">
@@ -465,7 +465,7 @@ const ExtraTab: React.FC<any> = props => {
   );
 };
 
-const View: React.FC<AnyObject> = (props: AnyObject) => {
+const View: React.FC<any> = (props: any) => {
   const { data, showTab, transitionTimeout, deleteEntity } = props;
   return (
     <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
@@ -500,7 +500,7 @@ const View: React.FC<AnyObject> = (props: AnyObject) => {
   );
 };
 
-const Edit: React.FC<AnyObject> = (props: AnyObject) => {
+const Edit: React.FC<any> = (props: any) => {
   const { data, showTab, transitionTimeout, editEntity } = props;
 
   const { register, handleSubmit, errors } = useForm({defaultValues: { ...data }, mode: "onBlur"});
@@ -530,7 +530,7 @@ const Edit: React.FC<AnyObject> = (props: AnyObject) => {
   );
 };
 
-const Create: React.FC<AnyObject> = (props: AnyObject) => {
+const Create: React.FC<any> = (props: any) => {
   const { showTab, transitionTimeout, createEntity } = props;
   const [usersData] = useSearch("https://jsonplaceholder.typicode.com/users");
 
