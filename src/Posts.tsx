@@ -5,7 +5,7 @@ import Select from "react-select";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, ButtonGroup, Nav, Table, Tooltip, Tab, OverlayTrigger, Form, Row, Col, Badge, ButtonToolbar } from "react-bootstrap";
-import { Animated } from "react-animated-css";
+import { useTransition, animated } from "react-spring";
 import { useForm, Controller } from "react-hook-form";
 
 import { useSearch, SearchParams } from "./hooks/useSearch";
@@ -118,12 +118,12 @@ const Posts: React.FC = () => {
 
   const openNewTab = (row: any | null, tabMode: string = "view") => {
     if (row != null) {
-      if (!extraTabs.find(tab => tab.id.toString() === row.id.toString())) {
+      if (!extraTabs.find(tab => tab.data.id.toString() === row.id.toString())) {
         setExtraTabs(prevTabs => [...prevTabs, { data: { ...row }, show: true, tabMode }]);
       }
       setActiveTab(row.id.toString());
     } else if (tabMode.toLowerCase() === "create") {
-      if (!extraTabs.find(tab => tab.id.toString() === "Create")) {
+      if (!extraTabs.find(tab => tab.data.id.toString() === "Create")) {
         setExtraTabs(prevTabs => [...prevTabs, { data: { id: "Create" }, show: true, tabMode }]);
       }
       setActiveTab("Create");
@@ -147,8 +147,6 @@ const Posts: React.FC = () => {
         let newTabId: string = tabIndex === 0 ? "Results" : extraTabs[tabIndex - 1].id.toString();
         setActiveTab(newTabId);
       }
-
-      setTimeout(() => setExtraTabs(prevTabs => [...prevTabs.slice(0, tabIndex), ...prevTabs.slice(tabIndex + 1)]), transitionTimeout);
     }
   };
 
@@ -274,6 +272,7 @@ const Posts: React.FC = () => {
                   showTab={tab.show}
                   closeTab={closeTab}
                   tabMode={tab.tabMode}
+                  setExtraTabs={setExtraTabs}
                 />
               )
             }
@@ -422,9 +421,16 @@ const ActionsCellRenderer = (props: ICellRendererParams) => {
 };
 
 const ExtraTab: React.FC<any> = props => {
-  const { tabId, showTab, transitionTimeout, tabMode, closeTab } = props;
+  const { tabId, showTab, tabMode, closeTab, setExtraTabs } = props;
 
   const [isHovered, setIsHovered] = useState(false);
+
+  const transition = useTransition(showTab, null, {
+    from: { opacity: 0 },
+    enter: { opacity: 1 },
+    leave: { opacity: 0 },
+    onDestroyed: () => setExtraTabs((prevTabs: any) => prevTabs.filter((tab: any) => tab.data.id.toString() !== tabId.toString()))
+  });
 
   const badge = (tabMode: string) => {
     switch (tabMode.toLowerCase()) {
@@ -436,39 +442,53 @@ const ExtraTab: React.FC<any> = props => {
   };
 
   return (
-    <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
-      <Nav.Item as="li">
-        <Nav.Link
-          eventKey={tabId.toString()}
-          style={{ cursor: "pointer" }}
-        >
-          {tabId.toString()}
-          &nbsp;
-          {badge(tabMode)}
-          &nbsp;
-          <FontAwesomeIcon
-            icon="times"
-            size="sm"
-            onClick={event => {
-              event.stopPropagation();
-              event.preventDefault();
-              closeTab(tabId.toString());
-            }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            className={isHovered ? "text-danger" : undefined}
-          />
+    <>
+    {transition.map(({item, key, props}) => item && (
+        <animated.div key={key} style={props}>
+          <Nav.Item as="li">
+            <Nav.Link
+              eventKey={tabId.toString()}
+              style={{ cursor: "pointer" }}
+            >
+              {tabId.toString()}
+              &nbsp;
+              {badge(tabMode)}
+              &nbsp;
+              <FontAwesomeIcon
+                icon="times"
+                size="sm"
+                onClick={event => {
+                  event.stopPropagation();
+                  event.preventDefault();
+                  closeTab(tabId.toString());
+                }}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                className={isHovered ? "text-danger" : undefined}
+              />
 
-        </Nav.Link>
-      </Nav.Item>
-    </Animated>
+            </Nav.Link>
+          </Nav.Item>
+        </animated.div>
+      )
+    )}
+    </>
   );
 };
 
 const View: React.FC<any> = (props: any) => {
-  const { data, showTab, transitionTimeout, deleteEntity } = props;
+  const { data, showTab, deleteEntity } = props;
+
+  const transition = useTransition(showTab, null, {
+    from: { opacity: 0 },
+    enter: { opacity: 1 },
+    leave: { opacity: 0 }
+  });
+
   return (
-    <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
+    <>
+    {transition.map(({item, key, props}) => item && (
+    <animated.div key={key} style={props}>
       <Row>
         <Col xs sm={6} md={4}>
           <Table striped bordered>
@@ -495,81 +515,100 @@ const View: React.FC<any> = (props: any) => {
           <Button variant="danger" onClick={() => deleteEntity([data])}><FontAwesomeIcon fixedWidth icon="trash" /> Delete</Button>
         </Col>
       </Row>
-    </Animated>
-
+    </animated.div>
+    ))}
+    </>
   );
 };
 
 const Edit: React.FC<any> = (props: any) => {
-  const { data, showTab, transitionTimeout, editEntity } = props;
+  const { data, showTab, editEntity } = props;
 
   const { register, handleSubmit, errors } = useForm({defaultValues: { ...data }, mode: "onBlur"});
 
+  const transition = useTransition(showTab, null, {
+    from: { opacity: 0 },
+    enter: { opacity: 1 },
+    leave: { opacity: 0 }
+  });
+
   return (
-    <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
-      <Row>
-        <Col xs sm={6} md={4}>
-          <Form className="text-left" onSubmit={handleSubmit(async values => editEntity([{ ...data, ...values }]))}>
-            <Form.Group controlId="title">
-              <Form.Label>Title</Form.Label>
-              <input type="text" className="form-control" name="title" ref={register({required: true})}/>
-              {errors.title && <span className="text-danger">Required</span>}
-            </Form.Group>
-            <Form.Group controlId="body">
-              <Form.Label>Body</Form.Label>
-              <input type="text" className="form-control" name="body" ref={register({required: true})}/>
-              {errors.body && <span className="text-danger">Required</span>}
-            </Form.Group>
+    <>
+    {transition.map(({item, key, props}) => item && (
+      <animated.div key={key} style={props}>
+        <Row>
+          <Col xs sm={6} md={4}>
+            <Form className="text-left" onSubmit={handleSubmit(async values => editEntity([{ ...data, ...values }]))}>
+              <Form.Group controlId="title">
+                <Form.Label>Title</Form.Label>
+                <input type="text" className="form-control" name="title" ref={register({required: true})}/>
+                {errors.title && <span className="text-danger">Required</span>}
+              </Form.Group>
+              <Form.Group controlId="body">
+                <Form.Label>Body</Form.Label>
+                <input type="text" className="form-control" name="body" ref={register({required: true})}/>
+                {errors.body && <span className="text-danger">Required</span>}
+              </Form.Group>
 
-            <Button variant="primary" type="submit" disabled={Object.keys(errors).length > 0}>Submit</Button>
-          </Form>
-        </Col>
-      </Row>
-    </Animated>
-
+              <Button variant="primary" type="submit" disabled={Object.keys(errors).length > 0}>Submit</Button>
+            </Form>
+          </Col>
+        </Row>
+      </animated.div>
+    ))}
+    </>
   );
 };
 
 const Create: React.FC<any> = (props: any) => {
-  const { showTab, transitionTimeout, createEntity } = props;
+  const { showTab, createEntity } = props;
   const [usersData] = useSearch("https://jsonplaceholder.typicode.com/users");
 
   const { register, handleSubmit, errors, control } = useForm({ mode: "onBlur" });
 
-  return (
-    <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDuration={transitionTimeout} animationOutDuration={transitionTimeout} isVisible={showTab}>
-      <Row>
-        <Col xs sm={6} md={4}>
-          <Form className="text-left" onSubmit={handleSubmit(async values => createEntity([{ ...values }]))}>
-            <Form.Group controlId="user">
-              <Form.Label>User</Form.Label>
-              <Controller
-                as={<Select options={usersData.map(user => ({ value: user, label: user.name }))} isClearable />}
-                rules={{required: true}}
-                name="user"
-                control={control}
-                onBlurName="onChange"
-                onBlur={([selected]) => ({ value: selected })}
-              />
-              {errors.user && <span className="text-danger">Required</span>}
-            </Form.Group>
-            <Form.Group controlId="title">
-              <Form.Label>Title</Form.Label>
-              <input type="text" className="form-control" name="title" ref={register({required: true})}/>
-              {errors.title && <span className="text-danger">Required</span>}
-            </Form.Group>
-            <Form.Group controlId="body">
-              <Form.Label>Body</Form.Label>
-              <input type="text" className="form-control" name="body" ref={register({required: true})}/>
-              {errors.body && <span className="text-danger">Required</span>}
-            </Form.Group>
-            
-            <Button variant="primary" type="submit" disabled={Object.keys(errors).length > 0}>Submit</Button>
-          </Form>
-        </Col>
-      </Row>
-    </Animated>
+  const transition = useTransition(showTab, null, {
+    from: { opacity: 0 },
+    enter: { opacity: 1 },
+    leave: { opacity: 0 }
+  });
 
+  return (
+    <>
+    {transition.map(({item, key, props}) => item && (
+      <animated.div key={key} style={props}>
+        <Row>
+          <Col xs sm={6} md={4}>
+            <Form className="text-left" onSubmit={handleSubmit(async values => createEntity([{ ...values }]))}>
+              <Form.Group controlId="user">
+                <Form.Label>User</Form.Label>
+                <Controller
+                  as={<Select options={usersData.map(user => ({ value: user, label: user.name }))} isClearable />}
+                  rules={{required: true}}
+                  name="user"
+                  control={control}
+                  onBlurName="onChange"
+                  onBlur={([selected]) => ({ value: selected })}
+                />
+                {errors.user && <span className="text-danger">Required</span>}
+              </Form.Group>
+              <Form.Group controlId="title">
+                <Form.Label>Title</Form.Label>
+                <input type="text" className="form-control" name="title" ref={register({required: true})}/>
+                {errors.title && <span className="text-danger">Required</span>}
+              </Form.Group>
+              <Form.Group controlId="body">
+                <Form.Label>Body</Form.Label>
+                <input type="text" className="form-control" name="body" ref={register({required: true})}/>
+                {errors.body && <span className="text-danger">Required</span>}
+              </Form.Group>
+              
+              <Button variant="primary" type="submit" disabled={Object.keys(errors).length > 0}>Submit</Button>
+            </Form>
+          </Col>
+        </Row>
+      </animated.div>
+    ))}
+    </>
   );
 };
 
