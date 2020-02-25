@@ -18,7 +18,6 @@ import "@ag-grid-community/all-modules/dist/styles/ag-theme-material.css";
 const GridContext: React.Context<any> = React.createContext<any>({});
 
 const Posts: React.FC = () => {
-  const transitionTimeout = 500;
   const [extraTabs, setExtraTabs] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<string>("Results");
 
@@ -268,7 +267,6 @@ const Posts: React.FC = () => {
                 <ExtraTab
                   key={tab.data.id}
                   tabId={tab.data.id}
-                  transitionTimeout={transitionTimeout}
                   showTab={tab.show}
                   closeTab={closeTab}
                   tabMode={tab.tabMode}
@@ -345,7 +343,6 @@ const Posts: React.FC = () => {
                     tabComponent = (
                       <Create
                         showTab={tab.show}
-                        transitionTimeout={transitionTimeout}
                         createEntity={createRows}
                       />
                     );
@@ -355,7 +352,6 @@ const Posts: React.FC = () => {
                       <Edit
                         data={tab.data}
                         showTab={tab.show}
-                        transitionTimeout={transitionTimeout}
                         editEntity={editRows}
                       />
                     );
@@ -365,7 +361,6 @@ const Posts: React.FC = () => {
                       <View
                         data={tab.data}
                         showTab={tab.show}
-                        transitionTimeout={transitionTimeout}
                         deleteEntity={deleteRows}
                       />
                     );
