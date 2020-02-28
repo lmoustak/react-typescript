@@ -438,7 +438,7 @@ const ExtraTab: React.FC<any> = props => {
 
   return (
     <>
-    {transition.map(({item, key, props}) => item && (
+      {transition.map(({ item, key, props }) => item && (
         <animated.div key={key} style={props}>
           <Nav.Item as="li">
             <Nav.Link
@@ -466,7 +466,7 @@ const ExtraTab: React.FC<any> = props => {
           </Nav.Item>
         </animated.div>
       )
-    )}
+      )}
     </>
   );
 };
@@ -482,36 +482,36 @@ const View: React.FC<any> = (props: any) => {
 
   return (
     <>
-    {transition.map(({item, key, props}) => item && (
-    <animated.div key={key} style={props}>
-      <Row>
-        <Col xs sm={6} md={4}>
-          <Table striped bordered>
-            <tbody>
-              <tr>
-                <th>User Id</th>
-                <td>{data.userId}</td>
-              </tr>
-              <tr>
-                <th>Username</th>
-                <td>{data.username}</td>
-              </tr>
-              <tr>
-                <th>Title</th>
-                <td>{data.title}</td>
-              </tr>
-              <tr>
-                <th>Body</th>
-                <td>{data.body}</td>
-              </tr>
-            </tbody>
-          </Table>
+      {transition.map(({ item, key, props }) => item && (
+        <animated.div key={key} style={props}>
+          <Row>
+            <Col xs sm={6} md={4}>
+              <Table striped bordered>
+                <tbody>
+                  <tr>
+                    <th>User Id</th>
+                    <td>{data.userId}</td>
+                  </tr>
+                  <tr>
+                    <th>Username</th>
+                    <td>{data.username}</td>
+                  </tr>
+                  <tr>
+                    <th>Title</th>
+                    <td>{data.title}</td>
+                  </tr>
+                  <tr>
+                    <th>Body</th>
+                    <td>{data.body}</td>
+                  </tr>
+                </tbody>
+              </Table>
 
-          <Button variant="danger" onClick={() => deleteEntity([data])}><FontAwesomeIcon fixedWidth icon="trash" /> Delete</Button>
-        </Col>
-      </Row>
-    </animated.div>
-    ))}
+              <Button variant="danger" onClick={() => deleteEntity([data])}><FontAwesomeIcon fixedWidth icon="trash" /> Delete</Button>
+            </Col>
+          </Row>
+        </animated.div>
+      ))}
     </>
   );
 };
@@ -519,7 +519,7 @@ const View: React.FC<any> = (props: any) => {
 const Edit: React.FC<any> = (props: any) => {
   const { data, showTab, editEntity } = props;
 
-  const { register, handleSubmit, errors } = useForm({defaultValues: { ...data }, mode: "onBlur"});
+  const { register, handleSubmit, errors } = useForm({ defaultValues: { ...data }, mode: "onBlur" });
 
   const transition = useTransition(showTab, null, {
     from: { opacity: 0 },
@@ -529,28 +529,28 @@ const Edit: React.FC<any> = (props: any) => {
 
   return (
     <>
-    {transition.map(({item, key, props}) => item && (
-      <animated.div key={key} style={props}>
-        <Row>
-          <Col xs sm={6} md={4}>
-            <Form className="text-left" onSubmit={handleSubmit(async values => editEntity([{ ...data, ...values }]))}>
-              <Form.Group controlId="title">
-                <Form.Label>Title</Form.Label>
-                <input type="text" className="form-control" name="title" ref={register({required: true})}/>
-                {errors.title && <span className="text-danger">Required</span>}
-              </Form.Group>
-              <Form.Group controlId="body">
-                <Form.Label>Body</Form.Label>
-                <input type="text" className="form-control" name="body" ref={register({required: true})}/>
-                {errors.body && <span className="text-danger">Required</span>}
-              </Form.Group>
+      {transition.map(({ item, key, props }) => item && (
+        <animated.div key={key} style={props}>
+          <Row>
+            <Col xs sm={6} md={4}>
+              <Form className="text-left" onSubmit={handleSubmit(async values => editEntity([{ ...data, ...values }]))}>
+                <Form.Group controlId="title">
+                  <Form.Label>Title</Form.Label>
+                  <input type="text" className="form-control" name="title" ref={register({ required: true })} />
+                  {errors.title && <span className="text-danger">Required</span>}
+                </Form.Group>
+                <Form.Group controlId="body">
+                  <Form.Label>Body</Form.Label>
+                  <input type="text" className="form-control" name="body" ref={register({ required: true })} />
+                  {errors.body && <span className="text-danger">Required</span>}
+                </Form.Group>
 
-              <Button variant="primary" type="submit" disabled={Object.keys(errors).length > 0}>Submit</Button>
-            </Form>
-          </Col>
-        </Row>
-      </animated.div>
-    ))}
+                <Button variant="primary" type="submit" disabled={Object.keys(errors).length > 0}>Submit</Button>
+              </Form>
+            </Col>
+          </Row>
+        </animated.div>
+      ))}
     </>
   );
 };
@@ -569,40 +569,39 @@ const Create: React.FC<any> = (props: any) => {
 
   return (
     <>
-    {transition.map(({item, key, props}) => item && (
-      <animated.div key={key} style={props}>
-        <Row>
-          <Col xs sm={6} md={4}>
-            <Form className="text-left" onSubmit={handleSubmit(async values => createEntity([{ ...values }]))}>
-              <Form.Group controlId="user">
-                <Form.Label>User</Form.Label>
-                <Controller
-                  as={<Select options={usersData.map(user => ({ value: user, label: user.name }))} isClearable />}
-                  rules={{required: true}}
-                  name="user"
-                  control={control}
-                  onBlurName="onChange"
-                  onBlur={([selected]) => ({ value: selected })}
-                />
-                {errors.user && <span className="text-danger">Required</span>}
-              </Form.Group>
-              <Form.Group controlId="title">
-                <Form.Label>Title</Form.Label>
-                <input type="text" className="form-control" name="title" ref={register({required: true})}/>
-                {errors.title && <span className="text-danger">Required</span>}
-              </Form.Group>
-              <Form.Group controlId="body">
-                <Form.Label>Body</Form.Label>
-                <input type="text" className="form-control" name="body" ref={register({required: true})}/>
-                {errors.body && <span className="text-danger">Required</span>}
-              </Form.Group>
-              
-              <Button variant="primary" type="submit" disabled={Object.keys(errors).length > 0}>Submit</Button>
-            </Form>
-          </Col>
-        </Row>
-      </animated.div>
-    ))}
+      {transition.map(({ item, key, props }) => item && (
+        <animated.div key={key} style={props}>
+          <Row>
+            <Col xs sm={6} md={4}>
+              <Form className="text-left" onSubmit={handleSubmit(async values => createEntity([{ ...values }]))}>
+                <Form.Group controlId="user">
+                  <Form.Label>User</Form.Label>
+                  <Controller
+                    as={<Select options={usersData.map(user => ({ value: user, label: user.name }))} isClearable />}
+                    rules={{ required: true }}
+                    name="user"
+                    control={control}
+                    onChange={([selected]) => ({ value: selected })}
+                  />
+                  {errors.user && <span className="text-danger">Required</span>}
+                </Form.Group>
+                <Form.Group controlId="title">
+                  <Form.Label>Title</Form.Label>
+                  <input type="text" className="form-control" name="title" ref={register({ required: true })} />
+                  {errors.title && <span className="text-danger">Required</span>}
+                </Form.Group>
+                <Form.Group controlId="body">
+                  <Form.Label>Body</Form.Label>
+                  <input type="text" className="form-control" name="body" ref={register({ required: true })} />
+                  {errors.body && <span className="text-danger">Required</span>}
+                </Form.Group>
+
+                <Button variant="primary" type="submit" disabled={Object.keys(errors).length > 0}>Submit</Button>
+              </Form>
+            </Col>
+          </Row>
+        </animated.div>
+      ))}
     </>
   );
 };
