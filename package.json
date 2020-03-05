@@ -6,6 +6,7 @@
     "@ag-grid-community/all-modules": "^22.1.1",
     "@ag-grid-community/react": "^22.1.2",
     "@fortawesome/fontawesome-svg-core": "^1.2.27",
+    "@fortawesome/free-regular-svg-icons": "^5.12.1",
     "@fortawesome/free-solid-svg-icons": "^5.12.1",
     "@fortawesome/react-fontawesome": "^0.1.8",
     "@types/classnames": "^2.2.9",
@@ -32,6 +33,7 @@
     "react-select": "^3.0.8",
     "react-sortable-hoc": "^1.11.0",
     "react-spring": "^8.0.27",
+    "react-switch": "^5.0.1",
     "styled-components": "^5.0.1",
     "typescript": "^3.8.3"
   },
