@@ -248,7 +248,7 @@ const Posts: React.FC = () => {
 
   return (
     <GridContext.Provider value={{ openNewTab, deleteRows }}>
-      <div className="mt-5">
+      <div className="pt-5">
         <Tab.Container
           activeKey={activeTab}
           onSelect={(key: string) => setActiveTab(key)}

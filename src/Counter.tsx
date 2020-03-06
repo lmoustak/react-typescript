@@ -13,7 +13,7 @@ const Counter: React.FC = () => {
   const handleStepChange = (event: React.ChangeEvent<HTMLInputElement>) => setStep(event.target.valueAsNumber || 1);
 
   return (
-    <Row className="mt-5">
+    <Row className="pt-5">
       <Col xs md={{span: 4, offset: 4}}>
         <p>Current counter value: {counter}</p>
         <Button color="primary" size="sm" onClick={handleResetClick}>Reset</Button>

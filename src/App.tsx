@@ -63,7 +63,7 @@ const AnimatedPages: React.FC = () => {
 ### Select one of the top links to begin`;
 
   const startScreen = (
-    <Row className="mt-5">
+    <Row className="pt-5">
       <Col xs>
         <ReactMarkdown source={markdown} />
       </Col>
@@ -99,32 +99,32 @@ const AnimatedPages: React.FC = () => {
 
       {/* A <Switch> looks through its children <Route>s and
           renders the first one that matches the current URL. */}
-      <Container fluid className="text-center">
+      <Container fluid className="text-center p-0">
         {transitions.map(({ item, props, key }) => (
           <animated.div key={key} style={props}>
             <Switch location={item}>
               <Route exact path="/">
-                <div className="page">
+                <div style={{ position: "absolute", left: 0, right: 0, height: "calc(100vh - 56px)" }} className={`px-5 overflow-hidden bg-${light ? "white" : "secondary"} text-${light ? "dark" : "white"}`}>
                   {startScreen}
                 </div>
               </Route>
               <Route path="/counter">
-                <div className="page">
+                <div style={{ position: "absolute", left: 0, right: 0, height: "calc(100vh - 56px)" }} className={`px-5 overflow-hidden bg-${light ? "white" : "secondary"} text-${light ? "dark" : "white"}`}>
                   <Counter />
                 </div>
               </Route>
               <Route path="/users">
-                <div className="page">
+                <div style={{ position: "absolute", left: 0, right: 0, height: "calc(100vh - 56px)" }} className={`px-5 overflow-hidden bg-${light ? "white" : "secondary"} text-${light ? "dark" : "white"}`}>
                   <FetchUsers />
                 </div>
               </Route>
               <Route path="/posts">
-                <div className="page">
+                <div style={{ position: "absolute", left: 0, right: 0, height: "calc(100vh - 56px)" }} className={`px-5 overflow-hidden bg-${light ? "white" : "secondary"} text-${light ? "dark" : "white"}`}>
                   <Posts />
                 </div>
               </Route>
               <Route path="*">
-                <div className="page">
+                <div style={{ position: "absolute", left: 0, right: 0, height: "calc(100vh - 56px)" }} className={`px-5 overflow-hidden bg-${light ? "white" : "secondary"} text-${light ? "dark" : "white"}`}>
                   <Row className="mt-5">
                     <Col xs>
                       <h1>404</h1>
