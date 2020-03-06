@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { Row, Col, Navbar, Nav, Container } from "react-bootstrap";
-import { useTrail, useTransition, animated } from "react-spring";
+import { useSpring, useTrail, useTransition, animated } from "react-spring";
 import ToggleSwitch from "react-switch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -50,6 +50,7 @@ const AnimatedPages: React.FC = () => {
     leave: prevLocation => ({ opacity: 0, transform: `translateX(${Math.sign(paths.indexOf(prevLocation.pathname) - paths.indexOf(currentPage)) * 10}%)` }),
   });
 
+  const themeProps = useSpring({ backgroundColor: light ? "white" : "#555", color: light ? "black" : "white" });
   
   const navbarTrail = useTrail(navbarItems.length, {
     opacity: 1,
@@ -100,42 +101,47 @@ const AnimatedPages: React.FC = () => {
       {/* A <Switch> looks through its children <Route>s and
           renders the first one that matches the current URL. */}
       <Container fluid className="text-center p-0">
-        {transitions.map(({ item, props, key }) => (
-          <animated.div key={key} style={props}>
-            <Switch location={item}>
-              <Route exact path="/">
-                <div style={{ position: "absolute", left: 0, right: 0, height: "calc(100vh - 56px)" }} className={`px-5 overflow-hidden bg-${light ? "white" : "secondary"} text-${light ? "dark" : "white"}`}>
-                  {startScreen}
-                </div>
-              </Route>
-              <Route path="/counter">
-                <div style={{ position: "absolute", left: 0, right: 0, height: "calc(100vh - 56px)" }} className={`px-5 overflow-hidden bg-${light ? "white" : "secondary"} text-${light ? "dark" : "white"}`}>
-                  <Counter />
-                </div>
-              </Route>
-              <Route path="/users">
-                <div style={{ position: "absolute", left: 0, right: 0, height: "calc(100vh - 56px)" }} className={`px-5 overflow-hidden bg-${light ? "white" : "secondary"} text-${light ? "dark" : "white"}`}>
-                  <FetchUsers />
-                </div>
-              </Route>
-              <Route path="/posts">
-                <div style={{ position: "absolute", left: 0, right: 0, height: "calc(100vh - 56px)" }} className={`px-5 overflow-hidden bg-${light ? "white" : "secondary"} text-${light ? "dark" : "white"}`}>
-                  <Posts />
-                </div>
-              </Route>
-              <Route path="*">
-                <div style={{ position: "absolute", left: 0, right: 0, height: "calc(100vh - 56px)" }} className={`px-5 overflow-hidden bg-${light ? "white" : "secondary"} text-${light ? "dark" : "white"}`}>
-                  <Row className="mt-5">
-                    <Col xs>
-                      <h1>404</h1>
-                      <h4>Page not found</h4>
-                    </Col>
-                  </Row>
-                </div>
-              </Route>
-            </Switch>
-          </animated.div>
-        ))}
+        <animated.div style={{ ...themeProps, height: "calc(100vh - 56px)" }} className={`px-5 overflow-hidden`}>
+          {
+            transitions.map(({ item, props, key }) => (
+              <animated.div key={key} style={props}>
+                <Switch location={item}>
+                  <Route exact path="/">
+                    <div style={{ position: "absolute", left: 0, right: 0 }}>
+                      {startScreen}
+                    </div>
+                  </Route>
+                  <Route path="/counter">
+                    <div style={{ position: "absolute", left: 0, right: 0 }}>
+                      <Counter />
+                    </div>
+                  </Route>
+                  <Route path="/users">
+                    <div style={{ position: "absolute", left: 0, right: 0 }}>
+                      <FetchUsers />
+                    </div>
+                  </Route>
+                  <Route path="/posts">
+                    <div style={{ position: "absolute", left: 0, right: 0 }}>
+                      <Posts />
+                    </div>
+                  </Route>
+                  <Route path="*">
+                    <div style={{ position: "absolute", left: 0, right: 0 }}>
+                      <Row className="mt-5">
+                        <Col xs>
+                          <h1>404</h1>
+                          <h4>Page not found</h4>
+                        </Col>
+                      </Row>
+                    </div>
+                  </Route>
+                </Switch>
+              </animated.div>
+            ))
+          }
+        
+        </animated.div>
       </Container>
 
     </div>
