@@ -8,7 +8,9 @@ import {
 } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { Row, Col, Navbar, Nav, Container } from "react-bootstrap";
-import { useTrail, useTransition, animated } from "react-spring";
+import { useSpring, useTrail, useTransition, animated } from "react-spring";
+import ToggleSwitch from "react-switch";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import './App.css';
 import './styles.css';
@@ -27,6 +29,8 @@ const AnimatedPages: React.FC = () => {
   const [currentPage, setCurrentPage] = useState("");
   const previousPage = usePrevious(currentPage);
   const location = useLocation();
+
+  const [light, setLight] = useState(true);
 
   useEffect(() => {
     setCurrentPage(location.pathname);
@@ -53,6 +57,8 @@ const AnimatedPages: React.FC = () => {
     from: { opacity: 0, transform: "translateX(50px)" }
   });
 
+  const pageProps = useSpring({ backgroundColor: light ? "#fff" : "#000", color: light ? "#000" : "#fff" });
+
 
   const markdown =
     `# Welcome to the ReactJS playground
@@ -68,7 +74,7 @@ const AnimatedPages: React.FC = () => {
 
   return (
     <div>
-      <Navbar bg="light" expand="sm">
+      <Navbar variant={light ? "light" : "dark"} bg={light ? "light" : "dark"} expand="sm">
         <Navbar.Brand>React playground</Navbar.Brand>
         <Nav className="mr-auto">
           {navbarTrail.map(
@@ -80,56 +86,54 @@ const AnimatedPages: React.FC = () => {
               </animated.div>
             )
           )}
-          {/* <Nav.Item>
-            <NavLink className="nav-link" to="/" exact>Home</NavLink>
-          </Nav.Item>
-          <Nav.Item>
-            <NavLink className="nav-link" to="/counter">Counter</NavLink>
-          </Nav.Item>
-          <Nav.Item>
-            <NavLink className="nav-link" to="/users">Users</NavLink>
-          </Nav.Item>
-          <Nav.Item>
-            <NavLink className="nav-link" to="/posts">Posts</NavLink>
-          </Nav.Item> */}
+        </Nav>
+        <Nav>
+          <ToggleSwitch
+            checked={light}
+            onChange={() => setLight(light => !light)}
+            offColor="#000"
+            onColor="#CCC"
+            uncheckedIcon={<div style={{color: "white", position: "relative", left: "5px", top: "2px"}}><FontAwesomeIcon icon={["far", "moon"]} /></div>}
+            checkedIcon={<div style={{position: "relative", left: "8px", top: "2px"}}><FontAwesomeIcon icon="sun" /></div>}
+          />
         </Nav>
       </Navbar>
 
       {/* A <Switch> looks through its children <Route>s and
           renders the first one that matches the current URL. */}
-      <Container className="text-center">
+      <Container fluid className="text-center">
         {transitions.map(({ item, props, key }) => (
-          <animated.div key={key} style={props}>
+          <animated.div key={key} style={{...props, height: "calc(100vh - 56px)" }}>
             <Switch location={item}>
               <Route exact path="/">
-                <div className="page">
+                <animated.div className="page" style={{ ...pageProps, height: "100%" }}>
                   {startScreen}
-                </div>
+                </animated.div>
               </Route>
               <Route path="/counter">
-                <div className="page">
+                <animated.div className="page" style={{ ...pageProps, height: "100%" }}>
                   <Counter />
-                </div>
+                </animated.div>
               </Route>
               <Route path="/users">
-                <div className="page">
+                <animated.div className="page" style={{ ...pageProps, height: "100%" }}>
                   <FetchUsers />
-                </div>
+                </animated.div>
               </Route>
               <Route path="/posts">
-                <div className="page">
+                <animated.div className="page" style={{ ...pageProps, height: "100%" }}>
                   <Posts />
-                </div>
+                </animated.div>
               </Route>
               <Route path="*">
-                <div className="page">
-                <Row className="mt-5">
-                  <Col xs>
-                    <h1>404</h1>
-                    <h4>Page not found</h4>
-                  </Col>
-                </Row>
-                </div>
+                <animated.div className="page" style={{ ...pageProps, height: "100%" }}>
+                  <Row className="mt-5">
+                    <Col xs>
+                      <h1>404</h1>
+                      <h4>Page not found</h4>
+                    </Col>
+                  </Row>
+                </animated.div>
               </Route>
             </Switch>
           </animated.div>
