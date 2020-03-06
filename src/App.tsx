@@ -41,9 +41,9 @@ const AnimatedPages: React.FC = () => {
   const paths = navbarItems.map(item => item.linkTo);
 
   const transitions = useTransition(location, location => location.pathname, {
-    from: newLocation => ({ opacity: 0, transform: `translate3d(${Math.sign(paths.indexOf(newLocation.pathname) - paths.indexOf(previousPage ?? "")) * 20}%, 0, 0)` }),
-    enter: { opacity: 1, transform: 'translate3d(0, 0, 0)' },
-    leave: prevLocation => ({ opacity: 0, transform: `translate3d(${Math.sign(paths.indexOf(prevLocation.pathname) - paths.indexOf(currentPage)) * 10}%, 0, 0)` }),
+    from: newLocation => ({ opacity: 0, transform: `translateX(${Math.sign(paths.indexOf(newLocation.pathname) - paths.indexOf(previousPage ?? "")) * 20}%)` }),
+    enter: { opacity: 1, transform: 'translateX(0)' },
+    leave: prevLocation => ({ opacity: 0, transform: `translateX(${Math.sign(paths.indexOf(prevLocation.pathname) - paths.indexOf(currentPage)) * 10}%)` }),
   });
 
   
