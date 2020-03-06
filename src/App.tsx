@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { Row, Col, Navbar, Nav, Container } from "react-bootstrap";
-import { useSpring, useTrail, useTransition, animated } from "react-spring";
+import { useTrail, useTransition, animated } from "react-spring";
 import ToggleSwitch from "react-switch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -57,8 +57,6 @@ const AnimatedPages: React.FC = () => {
     from: { opacity: 0, transform: "translateX(50px)" }
   });
 
-  const pageProps = useSpring({ backgroundColor: light ? "#fff" : "#000", color: light ? "#000" : "#fff" });
-
 
   const markdown =
     `# Welcome to the ReactJS playground
@@ -103,37 +101,37 @@ const AnimatedPages: React.FC = () => {
           renders the first one that matches the current URL. */}
       <Container fluid className="text-center">
         {transitions.map(({ item, props, key }) => (
-          <animated.div key={key} style={{...props, height: "calc(100vh - 56px)" }}>
+          <animated.div key={key} style={props}>
             <Switch location={item}>
               <Route exact path="/">
-                <animated.div className="page" style={{ ...pageProps, height: "100%" }}>
+                <div className="page">
                   {startScreen}
-                </animated.div>
+                </div>
               </Route>
               <Route path="/counter">
-                <animated.div className="page" style={{ ...pageProps, height: "100%" }}>
+                <div className="page">
                   <Counter />
-                </animated.div>
+                </div>
               </Route>
               <Route path="/users">
-                <animated.div className="page" style={{ ...pageProps, height: "100%" }}>
+                <div className="page">
                   <FetchUsers />
-                </animated.div>
+                </div>
               </Route>
               <Route path="/posts">
-                <animated.div className="page" style={{ ...pageProps, height: "100%" }}>
+                <div className="page">
                   <Posts />
-                </animated.div>
+                </div>
               </Route>
               <Route path="*">
-                <animated.div className="page" style={{ ...pageProps, height: "100%" }}>
+                <div className="page">
                   <Row className="mt-5">
                     <Col xs>
                       <h1>404</h1>
                       <h4>Page not found</h4>
                     </Col>
                   </Row>
-                </animated.div>
+                </div>
               </Route>
             </Switch>
           </animated.div>
