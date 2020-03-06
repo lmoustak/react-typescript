@@ -101,7 +101,7 @@ const AnimatedPages: React.FC = () => {
       {/* A <Switch> looks through its children <Route>s and
           renders the first one that matches the current URL. */}
       <Container fluid className="text-center p-0">
-        <animated.div style={{ ...themeProps, height: "calc(100vh - 56px)" }} className={`px-5 overflow-hidden`}>
+        <animated.div style={{ ...themeProps, height: "calc(100vh - 56px)", overflowX: "hidden", overflowY: "auto" }} className="px-5">
           {
             transitions.map(({ item, props, key }) => (
               <animated.div key={key} style={props}>
@@ -113,17 +113,17 @@ const AnimatedPages: React.FC = () => {
                   </Route>
                   <Route path="/counter">
                     <div style={{ position: "absolute", left: 0, right: 0 }}>
-                      <Counter />
+                      <Counter themeProps={themeProps} />
                     </div>
                   </Route>
                   <Route path="/users">
                     <div style={{ position: "absolute", left: 0, right: 0 }}>
-                      <FetchUsers />
+                      <FetchUsers light={light} themeProps={themeProps} />
                     </div>
                   </Route>
                   <Route path="/posts">
                     <div style={{ position: "absolute", left: 0, right: 0 }}>
-                      <Posts />
+                      <Posts light={light} />
                     </div>
                   </Route>
                   <Route path="*">

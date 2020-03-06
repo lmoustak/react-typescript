@@ -4,12 +4,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import User from './interfaces/User';
 import { Table, InputGroup, FormControl, Button } from 'react-bootstrap';
+import { AnimatedValue } from 'react-spring';
 
 interface UserProps {
   users: User[]
 };
 
-const FetchUsers: React.FC = () => {
+const FetchUsers: React.FC<{ light: boolean, themeProps: AnimatedValue<any> }> = ({ light, themeProps }) => {
 
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
@@ -92,13 +93,13 @@ const FetchUsers: React.FC = () => {
       {loading
         ? (<div className="text-center"><FontAwesomeIcon icon="spinner" pulse size="8x"/></div>)
         : (
-          <Table striped>
+          <Table striped variant={light ? "" : "dark"}>
             <thead>
               <tr>
                 <th scope="col">Id</th>
                 <th scope="col">
                   <InputGroup>
-                    <FormControl type="text" name="nameFilter" value={nameFilter} placeholder="Name" onChange={handleUsersNameFilterChange} />
+                    <FormControl type="text" style={themeProps} name="nameFilter" value={nameFilter} placeholder="Name" onChange={handleUsersNameFilterChange} />
                     <InputGroup.Append>
                       <Button variant="outline-secondary" onClick={handleUsersNameFilterClearClick}><FontAwesomeIcon icon="times" /></Button>
                     </InputGroup.Append>
@@ -106,7 +107,7 @@ const FetchUsers: React.FC = () => {
                 </th>
                 <th scope="col">
                   <InputGroup>
-                    <FormControl type="text" name="usernameFilter" value={usernameFilter} placeholder="Username" onChange={handleUsersUsernameFilterChange} />
+                    <FormControl type="text" style={themeProps} name="usernameFilter" value={usernameFilter} placeholder="Username" onChange={handleUsersUsernameFilterChange} />
                     <InputGroup.Append>
                       <Button variant="outline-secondary" onClick={handleUsersUsernameFilterClearClick}><FontAwesomeIcon icon="times" /></Button>
                     </InputGroup.Append>
@@ -114,7 +115,7 @@ const FetchUsers: React.FC = () => {
                 </th>
                 <th scope="col">
                   <InputGroup>
-                    <FormControl type="text" name="emailFilter" value={emailFilter} placeholder="Email" onChange={handleUsersEmailFilterChange} />
+                    <FormControl type="text" style={themeProps} name="emailFilter" value={emailFilter} placeholder="Email" onChange={handleUsersEmailFilterChange} />
                     <InputGroup.Append>
                       <Button variant="outline-secondary" onClick={handleUsersEmailFilterClearClick}><FontAwesomeIcon icon="times" /></Button>
                     </InputGroup.Append>

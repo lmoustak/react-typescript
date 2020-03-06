@@ -17,7 +17,7 @@ import "@ag-grid-community/all-modules/dist/styles/ag-theme-material.css";
 
 const GridContext: React.Context<any> = React.createContext<any>({});
 
-const Posts: React.FC = () => {
+const Posts: React.FC<{ light: boolean }> = ({ light }) => {
   const [extraTabs, setExtraTabs] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<string>("Results");
 
@@ -312,7 +312,7 @@ const Posts: React.FC = () => {
                 </form>
 
                 <div
-                  className="ag-theme-balham"
+                  className={`ag-theme-balham${light ? "" : "-dark"}`}
                   style={{
                     height: '500px',
                     width: '100%'
