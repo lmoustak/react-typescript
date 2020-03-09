@@ -581,7 +581,6 @@ const Create: React.FC<any> = (props: any) => {
                     rules={{ required: true }}
                     name="user"
                     control={control}
-                    onChange={([selected]) => ({ value: selected })}
                   />
                   {errors.user && <span className="text-danger">Required</span>}
                 </Form.Group>
