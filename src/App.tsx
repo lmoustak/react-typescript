@@ -89,7 +89,7 @@ const AnimatedPages: React.FC = () => {
         <Nav>
           <ToggleSwitch
             checked={light}
-            onChange={() => setLight(light => !light)}
+            onChange={() => setLight(prevLight => !prevLight)}
             offColor="#000"
             onColor="#CCC"
             uncheckedIcon={<div style={{color: "white", position: "relative", left: "5px", top: "2px"}}><FontAwesomeIcon icon={["far", "moon"]} /></div>}
